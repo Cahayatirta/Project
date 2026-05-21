@@ -3,7 +3,17 @@ const db = require("../../config/database");
 const findUserById = async (id) => {
   const result = await db.query(
     `
-      SELECT id, full_name, email, role, created_at, updated_at
+      SELECT
+        id,
+        name,
+        email_address,
+        birth_date,
+        gender,
+        job,
+        work_location,
+        hobby,
+        created_at,
+        updated_at
       FROM users
       WHERE id = $1
     `,
@@ -13,4 +23,37 @@ const findUserById = async (id) => {
   return result.rows[0] || null;
 };
 
-module.exports = { findUserById };
+const updateUserById = async (id, payload) => {
+  const entries = Object.entries(payload).filter(([, value]) => value !== undefined);
+
+  if (!entries.length) {
+    return findUserById(id);
+  }
+
+  const assignments = entries.map(([key], index) => `${key} = $${index + 2}`);
+  const values = entries.map(([, value]) => value);
+
+  const result = await db.query(
+    `
+      UPDATE users
+      SET ${assignments.join(", ")}
+      WHERE id = $1
+      RETURNING
+        id,
+        name,
+        email_address,
+        birth_date,
+        gender,
+        job,
+        work_location,
+        hobby,
+        created_at,
+        updated_at
+    `,
+    [id, ...values]
+  );
+
+  return result.rows[0] || null;
+};
+
+module.exports = { findUserById, updateUserById };
