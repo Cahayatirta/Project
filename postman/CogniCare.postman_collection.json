@@ -7,6 +7,17 @@
   "item": [
     {
       "name": "Health Check",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status code is 200', function () { pm.response.to.have.status(200); });"
+            ]
+          }
+        }
+      ],
       "request": {
         "method": "GET",
         "header": [],
@@ -22,129 +33,2191 @@
       }
     },
     {
-      "name": "Auth - Register",
-      "event": [
+      "name": "Best Case",
+      "item": [
         {
-          "listen": "test",
-          "script": {
-            "type": "text/javascript",
-            "exec": [
-              "pm.test('Status code is 201', function () {",
-              "    pm.response.to.have.status(201);",
-              "});",
-              "",
-              "var jsonData = pm.response.json();",
-              "",
-              "if (jsonData && jsonData.data && jsonData.data.token) {",
-              "    pm.collectionVariables.set('token', jsonData.data.token);",
-              "}"
-            ]
-          }
-        }
-      ],
-      "request": {
-        "method": "POST",
-        "header": [
-          {
-            "key": "Content-Type",
-            "value": "application/json"
-          }
-        ],
-        "body": {
-          "mode": "raw",
-          "raw": "{\n  \"fullName\": \"Cahaya Tirta\",\n  \"email\": \"cahaya@example.com\",\n  \"password\": \"password123\",\n  \"role\": \"user\"\n}"
-        },
-        "url": {
-          "raw": "{{baseUrl}}/api/auth/register",
-          "host": [
-            "{{baseUrl}}"
-          ],
-          "path": [
-            "api",
-            "auth",
-            "register"
+          "name": "Auth",
+          "item": [
+            {
+              "name": "Before Login - Protected Route Without Token",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status code is 401', function () { pm.response.to.have.status(401); });"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/users/me",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "users",
+                    "me"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Register Primary",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Register primary handled', function () { pm.expect([201,409]).to.include(pm.response.code); });",
+                      "var jsonData = {};",
+                      "try { jsonData = pm.response.json(); } catch (e) {}",
+                      "if (jsonData?.data?.token) pm.environment.set('primaryToken', jsonData.data.token);",
+                      "if (jsonData?.data?.user?.id) pm.environment.set('primaryUserId', jsonData.data.user.id);"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"Cahaya Tirta\",\n  \"emailAddress\": \"{{primaryEmail}}\",\n  \"password\": \"{{primaryPassword}}\",\n  \"birthDate\": \"2000-01-01\",\n  \"gender\": \"male\",\n  \"job\": \"Backend Engineer\",\n  \"workLocation\": \"hybrid\",\n  \"hobby\": \"Reading\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/api/auth/register",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "auth",
+                    "register"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Login Primary",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status code is 200', function () { pm.response.to.have.status(200); });",
+                      "var jsonData = pm.response.json();",
+                      "pm.environment.set('primaryToken', jsonData.data.token);",
+                      "pm.environment.set('primaryUserId', jsonData.data.user.id);"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"emailAddress\": \"{{primaryEmail}}\",\n  \"password\": \"{{primaryPassword}}\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/api/auth/login",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "auth",
+                    "login"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Register Friend",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Register friend handled', function () { pm.expect([201,409]).to.include(pm.response.code); });",
+                      "var jsonData = {};",
+                      "try { jsonData = pm.response.json(); } catch (e) {}",
+                      "if (jsonData?.data?.token) pm.environment.set('friendToken', jsonData.data.token);",
+                      "if (jsonData?.data?.user?.id) pm.environment.set('friendAccountUserId', jsonData.data.user.id);"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"Friend Account\",\n  \"emailAddress\": \"{{friendEmail}}\",\n  \"password\": \"{{friendPassword}}\",\n  \"birthDate\": \"2001-02-01\",\n  \"gender\": \"female\",\n  \"job\": \"Designer\",\n  \"workLocation\": \"on_site\",\n  \"hobby\": \"Music\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/api/auth/register",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "auth",
+                    "register"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Login Friend",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status code is 200', function () { pm.response.to.have.status(200); });",
+                      "var jsonData = pm.response.json();",
+                      "pm.environment.set('friendToken', jsonData.data.token);",
+                      "pm.environment.set('friendAccountUserId', jsonData.data.user.id);"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"emailAddress\": \"{{friendEmail}}\",\n  \"password\": \"{{friendPassword}}\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/api/auth/login",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "auth",
+                    "login"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "After Login - Protected Route With Token",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status code is 200', function () { pm.response.to.have.status(200); });"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{primaryToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/users/me",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "users",
+                    "me"
+                  ]
+                }
+              }
+            }
           ]
-        }
-      }
-    },
-    {
-      "name": "Auth - Login",
-      "event": [
+        },
         {
-          "listen": "test",
-          "script": {
-            "type": "text/javascript",
-            "exec": [
-              "pm.test('Status code is 200', function () {",
-              "    pm.response.to.have.status(200);",
-              "});",
-              "",
-              "var jsonData = pm.response.json();",
-              "",
-              "if (jsonData && jsonData.data && jsonData.data.token) {",
-              "    pm.collectionVariables.set('token', jsonData.data.token);",
-              "}"
-            ]
-          }
-        }
-      ],
-      "request": {
-        "method": "POST",
-        "header": [
-          {
-            "key": "Content-Type",
-            "value": "application/json"
-          }
-        ],
-        "body": {
-          "mode": "raw",
-          "raw": "{\n  \"email\": \"cahaya@example.com\",\n  \"password\": \"password123\"\n}"
+          "name": "Middleware And Auth Guard",
+          "item": [
+            {
+              "name": "Protected Route - Valid Token",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status code is 200', function () { pm.response.to.have.status(200); });"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{primaryToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/users/me",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "users",
+                    "me"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Logout - Valid Token",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status code is 200', function () { pm.response.to.have.status(200); });"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{primaryToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/auth/logout",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "auth",
+                    "logout"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "After Logout - Protected Route Without Token",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status code is 401', function () { pm.response.to.have.status(401); });"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/users/me",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "users",
+                    "me"
+                  ]
+                }
+              }
+            }
+          ]
         },
-        "url": {
-          "raw": "{{baseUrl}}/api/auth/login",
-          "host": [
-            "{{baseUrl}}"
-          ],
-          "path": [
-            "api",
-            "auth",
-            "login"
+        {
+          "name": "User",
+          "item": [
+            {
+              "name": "Primary - Me",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status code is 200', function () { pm.response.to.have.status(200); });"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{primaryToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/users/me",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "users",
+                    "me"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Primary - Edit Profile",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status code is 200', function () { pm.response.to.have.status(200); });"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{primaryToken}}"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"Cahaya Tirta Update\",\n  \"job\": \"Software Engineer\",\n  \"workLocation\": \"on_site\",\n  \"hobby\": \"Running\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/api/users/profile",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "users",
+                    "profile"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Primary - See Friend Profile",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status code is 200', function () { pm.response.to.have.status(200); });"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{primaryToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/users/{{friendAccountUserId}}/profile",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "users",
+                    "{{friendAccountUserId}}",
+                    "profile"
+                  ]
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "Activity",
+          "item": [
+            {
+              "name": "Primary - Add Activity",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Primary activity handled', function () { pm.expect([201,409]).to.include(pm.response.code); });",
+                      "var jsonData = {};",
+                      "try { jsonData = pm.response.json(); } catch (e) {}",
+                      "if (jsonData?.data?.id) {",
+                      "  pm.environment.set('activityId', jsonData.data.id);",
+                      "}"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{primaryToken}}"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"date\": \"{{primaryActivityDate}}\",\n  \"screenTime\": 7.5,\n  \"sleepHours\": 6,\n  \"stressLevel\": 7,\n  \"wellnessIndex\": 5,\n  \"sleepQuality\": 5,\n  \"fatigueScore\": 7,\n  \"digitalBalance\": 4,\n  \"screenTimeCategory\": \"high\",\n  \"physicalActivity\": \"walking\",\n  \"caffeineIntake\": 2,\n  \"workHours\": 9,\n  \"mood\": \"tired\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/api/activities",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "activities"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Friend - Add Activity",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Friend activity handled', function () { pm.expect([201,409]).to.include(pm.response.code); });",
+                      "var jsonData = {};",
+                      "try { jsonData = pm.response.json(); } catch (e) {}",
+                      "if (jsonData?.data?.id) {",
+                      "  pm.environment.set('friendActivityId', jsonData.data.id);",
+                      "}"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{friendToken}}"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"date\": \"{{friendActivityDate}}\",\n  \"screenTime\": 4,\n  \"sleepHours\": 8,\n  \"stressLevel\": 2,\n  \"wellnessIndex\": 8,\n  \"sleepQuality\": 8,\n  \"fatigueScore\": 3,\n  \"digitalBalance\": 8,\n  \"screenTimeCategory\": \"medium\",\n  \"physicalActivity\": \"yoga\",\n  \"caffeineIntake\": 1,\n  \"workHours\": 7,\n  \"mood\": \"good\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/api/activities",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "activities"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Primary - Get Daily Activity",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status code is 200', function () { pm.response.to.have.status(200); });",
+                      "var jsonData = pm.response.json();",
+                      "if (Array.isArray(jsonData?.data?.items) && jsonData.data.items.length > 0 && jsonData.data.items[0]?.id) {",
+                      "  pm.environment.set('activityId', jsonData.data.items[0].id);",
+                      "} else if (Array.isArray(jsonData?.data?.history) && jsonData.data.history.length > 0 && jsonData.data.history[0]?.id) {",
+                      "  pm.environment.set('activityId', jsonData.data.history[0].id);",
+                      "}"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{primaryToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/activities?period=daily&date={{primaryActivityDate}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "activities"
+                  ],
+                  "query": [
+                    {
+                      "key": "period",
+                      "value": "daily"
+                    },
+                    {
+                      "key": "date",
+                      "value": "{{primaryActivityDate}}"
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Primary - Update Activity",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status code is 200', function () { pm.response.to.have.status(200); });"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{primaryToken}}"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"stressLevel\": 5,\n  \"mood\": \"better\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/api/activities/{{activityId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "activities",
+                    "{{activityId}}"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Primary - Average Every Factor",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status code is 200', function () { pm.response.to.have.status(200); });"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{primaryToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/activities/averages/factors?period=monthly&month=2026-05",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "activities",
+                    "averages",
+                    "factors"
+                  ],
+                  "query": [
+                    {
+                      "key": "period",
+                      "value": "monthly"
+                    },
+                    {
+                      "key": "month",
+                      "value": "2026-05"
+                    }
+                  ]
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "Social And Group",
+          "item": [
+            {
+              "name": "Primary - Add Friend by Email",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Friend relation handled', function () { pm.expect([200,201]).to.include(pm.response.code); });",
+                      "var jsonData = {};",
+                      "try { jsonData = pm.response.json(); } catch (e) {}",
+                      "if (jsonData?.data?.id) {",
+                      "  pm.environment.set('socialId', jsonData.data.id);",
+                      "}"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{primaryToken}}"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"emailAddress\": \"{{friendEmail}}\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/api/social/friends",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "social",
+                    "friends"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Friend - Get Friend Requests",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status code is 200', function () { pm.response.to.have.status(200); });",
+                      "var jsonData = pm.response.json();",
+                      "if (Array.isArray(jsonData.data) && jsonData.data.length > 0) {",
+                      "  pm.environment.set('socialId', jsonData.data[0].id);",
+                      "} else if (pm.environment.get('socialId')) {",
+                      "  pm.test('Existing socialId can be reused', function () { pm.expect(pm.environment.get('socialId')).to.be.a('string'); });",
+                      "}"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{friendToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/social/friends/requests",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "social",
+                    "friends",
+                    "requests"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Friend - Accept Friend",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Accept friend handled', function () { pm.expect([200,404]).to.include(pm.response.code); });"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{friendToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/social/friends/{{socialId}}/accept",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "social",
+                    "friends",
+                    "{{socialId}}",
+                    "accept"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Primary - Friend List",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status code is 200', function () { pm.response.to.have.status(200); });",
+                      "var jsonData = pm.response.json();",
+                      "pm.test('Friend list has summary and friends', function () {",
+                      "  pm.expect(jsonData.data.summary).to.be.an('array');",
+                      "  pm.expect(jsonData.data.friends).to.be.an('array');",
+                      "});"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{primaryToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/social/friends",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "social",
+                    "friends"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Primary - Create Group",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status code is 201', function () { pm.response.to.have.status(201); });",
+                      "var jsonData = pm.response.json();",
+                      "pm.environment.set('groupId', jsonData.data.id);"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{primaryToken}}"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"groupName\": \"Inner Circle\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/api/groups",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "groups"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Primary - Add Friend to Group",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Group add handled', function () { pm.expect([200,409]).to.include(pm.response.code); });"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{primaryToken}}"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"emailAddress\": \"{{friendEmail}}\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/api/groups/{{groupId}}/members",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "groups",
+                    "{{groupId}}",
+                    "members"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Primary - See Group Members",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status code is 200', function () { pm.response.to.have.status(200); });",
+                      "var jsonData = pm.response.json();",
+                      "pm.test('Group members is array', function () { pm.expect(jsonData.data).to.be.an('array'); });"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{primaryToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/groups/{{groupId}}/members",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "groups",
+                    "{{groupId}}",
+                    "members"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Primary - Edit Permissions Group",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status code is 200', function () { pm.response.to.have.status(200); });"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{primaryToken}}"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"canViewScreenTime\": true,\n  \"canViewSleepHours\": true,\n  \"canViewWellnessIndex\": true,\n  \"canViewSleepQuality\": true,\n  \"canViewFatigueScore\": true,\n  \"canViewDigitalBalance\": true,\n  \"canViewScreenTimeCategory\": true,\n  \"canViewPhysicalActivity\": true,\n  \"canViewCaffeineIntake\": true,\n  \"canViewWorkHours\": true,\n  \"canViewMood\": true\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/api/groups/{{groupId}}/permissions",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "groups",
+                    "{{groupId}}",
+                    "permissions"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Primary - Friend Averages by Permission",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status code is 200', function () { pm.response.to.have.status(200); });"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{primaryToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/social/friends/averages?groupId={{groupId}}&period=monthly&month=2026-05",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "social",
+                    "friends",
+                    "averages"
+                  ],
+                  "query": [
+                    {
+                      "key": "groupId",
+                      "value": "{{groupId}}"
+                    },
+                    {
+                      "key": "period",
+                      "value": "monthly"
+                    },
+                    {
+                      "key": "month",
+                      "value": "2026-05"
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Primary - Friend Stats",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status code is 200', function () { pm.response.to.have.status(200); });",
+                      "var jsonData = pm.response.json();",
+                      "pm.test('Friend stats has totals', function () {",
+                      "  pm.expect(jsonData.data.totalFriend).to.not.equal(undefined);",
+                      "  pm.expect(jsonData.data.totalRefreshedFriend).to.not.equal(undefined);",
+                      "  pm.expect(jsonData.data.totalNearBurnoutFriend).to.not.equal(undefined);",
+                      "});"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{primaryToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/social/friends/stats",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "social",
+                    "friends",
+                    "stats"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Primary - Remove Friend from Group",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Remove member handled', function () { pm.expect([200,404]).to.include(pm.response.code); });"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "DELETE",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{primaryToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/groups/{{groupId}}/members/{{friendAccountUserId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "groups",
+                    "{{groupId}}",
+                    "members",
+                    "{{friendAccountUserId}}"
+                  ]
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "Dashboard",
+          "item": [
+            {
+              "name": "Primary - Get Activity Daily",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status code is 200', function () { pm.response.to.have.status(200); });"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{primaryToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/dashboard/activity/daily?date={{primaryActivityDate}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "dashboard",
+                    "activity",
+                    "daily"
+                  ],
+                  "query": [
+                    {
+                      "key": "date",
+                      "value": "{{primaryActivityDate}}"
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Primary - Get Stress Summary",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status code is 200', function () { pm.response.to.have.status(200); });"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{primaryToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/dashboard/stress-summary?date={{primaryActivityDate}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "dashboard",
+                    "stress-summary"
+                  ],
+                  "query": [
+                    {
+                      "key": "date",
+                      "value": "{{primaryActivityDate}}"
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Primary - Recommend Activity",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status code is 200', function () { pm.response.to.have.status(200); });"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{primaryToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/dashboard/recommendation?date={{primaryActivityDate}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "dashboard",
+                    "recommendation"
+                  ],
+                  "query": [
+                    {
+                      "key": "date",
+                      "value": "{{primaryActivityDate}}"
+                    }
+                  ]
+                }
+              }
+            }
           ]
         }
-      }
+      ]
     },
     {
-      "name": "Users - Me",
-      "request": {
-        "method": "GET",
-        "header": [
-          {
-            "key": "Authorization",
-            "value": "Bearer {{token}}"
-          }
-        ],
-        "url": {
-          "raw": "{{baseUrl}}/api/users/me",
-          "host": [
-            "{{baseUrl}}"
-          ],
-          "path": [
-            "api",
-            "users",
-            "me"
+      "name": "Worst Case",
+      "item": [
+        {
+          "name": "Auth",
+          "item": [
+            {
+              "name": "Register - Missing Required Fields",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status code is 400', function () { pm.response.to.have.status(400); });"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"Only Name\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/api/auth/register",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "auth",
+                    "register"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Login - Wrong Password",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status code is 401', function () { pm.response.to.have.status(401); });"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"emailAddress\": \"{{primaryEmail}}\",\n  \"password\": \"wrongpassword\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/api/auth/login",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "auth",
+                    "login"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Login - Missing Fields",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status code is 400', function () { pm.response.to.have.status(400); });"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"emailAddress\": \"{{primaryEmail}}\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/api/auth/login",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "auth",
+                    "login"
+                  ]
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "Middleware And Auth Guard",
+          "item": [
+            {
+              "name": "Protected Route - No Token",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status code is 401', function () { pm.response.to.have.status(401); });"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/users/me",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "users",
+                    "me"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Protected Route - Invalid Token",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status code is 401', function () { pm.response.to.have.status(401); });"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{invalidToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/users/me",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "users",
+                    "me"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Logout - Invalid Token",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status code is 401', function () { pm.response.to.have.status(401); });"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{invalidToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/auth/logout",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "auth",
+                    "logout"
+                  ]
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "User",
+          "item": [
+            {
+              "name": "Me - Invalid Token",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status code is 401', function () { pm.response.to.have.status(401); });"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{invalidToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/users/me",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "users",
+                    "me"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "See Profile - Unknown User",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status code is 404', function () { pm.response.to.have.status(404); });"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{primaryToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/users/{{invalidUserId}}/profile",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "users",
+                    "{{invalidUserId}}",
+                    "profile"
+                  ]
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "Activity",
+          "item": [
+            {
+              "name": "Add Activity - Duplicate Date",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status code is 409', function () { pm.response.to.have.status(409); });"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{primaryToken}}"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"date\": \"{{primaryActivityDate}}\",\n  \"screenTime\": 6,\n  \"sleepHours\": 6,\n  \"stressLevel\": 6,\n  \"wellnessIndex\": 6,\n  \"sleepQuality\": 6,\n  \"fatigueScore\": 6,\n  \"digitalBalance\": 6,\n  \"screenTimeCategory\": \"high\",\n  \"physicalActivity\": \"walking\",\n  \"caffeineIntake\": 2,\n  \"workHours\": 8,\n  \"mood\": \"normal\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/api/activities",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "activities"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Get Activity - Invalid Period",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status code is 400', function () { pm.response.to.have.status(400); });"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{primaryToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/activities?period=yearly",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "activities"
+                  ],
+                  "query": [
+                    {
+                      "key": "period",
+                      "value": "yearly"
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Update Activity - Unknown Activity",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status code is 404', function () { pm.response.to.have.status(404); });"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{primaryToken}}"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"mood\": \"ghost\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/api/activities/{{invalidActivityId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "activities",
+                    "{{invalidActivityId}}"
+                  ]
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "Social And Group",
+          "item": [
+            {
+              "name": "Friend Stats - Invalid Token",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status code is 401', function () { pm.response.to.have.status(401); });"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{invalidToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/social/friends/stats",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "social",
+                    "friends",
+                    "stats"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Add Friend - Unknown Email",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status code is 404', function () { pm.response.to.have.status(404); });"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{primaryToken}}"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"emailAddress\": \"{{unknownEmail}}\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/api/social/friends",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "social",
+                    "friends"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Add Friend - Self Request",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status code is 400', function () { pm.response.to.have.status(400); });"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{primaryToken}}"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"emailAddress\": \"{{primaryEmail}}\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/api/social/friends",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "social",
+                    "friends"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Reject Friend - Unknown Request",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status code is 404', function () { pm.response.to.have.status(404); });"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{friendToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/social/friends/{{invalidSocialId}}/reject",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "social",
+                    "friends",
+                    "{{invalidSocialId}}",
+                    "reject"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Accept Friend - Unknown Request",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status code is 404', function () { pm.response.to.have.status(404); });"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{friendToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/social/friends/{{invalidSocialId}}/accept",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "social",
+                    "friends",
+                    "{{invalidSocialId}}",
+                    "accept"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Block Friend - Unknown Email",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status code is 404', function () { pm.response.to.have.status(404); });"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{primaryToken}}"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"emailAddress\": \"{{unknownEmail}}\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/api/social/friends/block",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "social",
+                    "friends",
+                    "block"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Create Group - Missing Name",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status code is 400', function () { pm.response.to.have.status(400); });"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{primaryToken}}"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/api/groups",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "groups"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "See Group Members - Unknown Group",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status code is 404', function () { pm.response.to.have.status(404); });"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{primaryToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/groups/{{invalidGroupId}}/members",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "groups",
+                    "{{invalidGroupId}}",
+                    "members"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Add Friend To Group - Unknown Group",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status code is 404', function () { pm.response.to.have.status(404); });"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{primaryToken}}"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"emailAddress\": \"{{friendEmail}}\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/api/groups/{{invalidGroupId}}/members",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "groups",
+                    "{{invalidGroupId}}",
+                    "members"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Remove Friend From Group - Unknown Group",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status code is 404', function () { pm.response.to.have.status(404); });"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "DELETE",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{primaryToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/groups/{{invalidGroupId}}/members/{{invalidUserId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "groups",
+                    "{{invalidGroupId}}",
+                    "members",
+                    "{{invalidUserId}}"
+                  ]
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "Dashboard",
+          "item": [
+            {
+              "name": "Friend Averages - Missing Group Id",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status code is 400', function () { pm.response.to.have.status(400); });"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{primaryToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/social/friends/averages?period=monthly&month=2026-05",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "social",
+                    "friends",
+                    "averages"
+                  ],
+                  "query": [
+                    {
+                      "key": "period",
+                      "value": "monthly"
+                    },
+                    {
+                      "key": "month",
+                      "value": "2026-05"
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Recommendation - No Activity Data",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status code is 404', function () { pm.response.to.have.status(404); });"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{primaryToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/dashboard/recommendation?date=2024-01-01",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "dashboard",
+                    "recommendation"
+                  ],
+                  "query": [
+                    {
+                      "key": "date",
+                      "value": "2024-01-01"
+                    }
+                  ]
+                }
+              }
+            }
           ]
         }
-      }
-    }
-  ],
-  "variable": [
-    {
-      "key": "baseUrl",
-      "value": "http://localhost:5000"
-    },
-    {
-      "key": "token",
-      "value": ""
+      ]
     }
   ]
 }
