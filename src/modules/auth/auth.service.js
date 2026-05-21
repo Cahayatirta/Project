@@ -1,21 +1,33 @@
 const bcrypt = require("bcryptjs");
 
-const { USER_ROLES } = require("../../constants/roles");
 const { ApiError } = require("../../utils/api-error");
 const { signAccessToken } = require("../../utils/jwt");
 const { createUser, findUserByEmail } = require("./auth.repository");
 
 const sanitizeUser = (user) => ({
   id: user.id,
-  fullName: user.full_name,
-  email: user.email,
-  role: user.role,
+  name: user.name,
+  emailAddress: user.email_address,
+  birthDate: user.birth_date,
+  gender: user.gender,
+  job: user.job,
+  workLocation: user.work_location,
+  hobby: user.hobby,
   createdAt: user.created_at,
   updatedAt: user.updated_at,
 });
 
-const register = async ({ fullName, email, password, role }) => {
-  const existingUser = await findUserByEmail(email);
+const register = async ({
+  name,
+  emailAddress,
+  password,
+  birthDate,
+  gender,
+  job,
+  workLocation,
+  hobby,
+}) => {
+  const existingUser = await findUserByEmail(emailAddress);
 
   if (existingUser) {
     throw new ApiError(409, "Email is already registered");
@@ -23,16 +35,19 @@ const register = async ({ fullName, email, password, role }) => {
 
   const hashedPassword = await bcrypt.hash(password, 10);
   const user = await createUser({
-    fullName,
-    email,
+    name,
+    emailAddress,
     password: hashedPassword,
-    role: role || USER_ROLES.USER,
+    birthDate,
+    gender,
+    job,
+    workLocation,
+    hobby,
   });
 
   const token = signAccessToken({
     sub: user.id,
-    email: user.email,
-    role: user.role,
+    emailAddress: user.email_address,
   });
 
   return {
@@ -41,8 +56,8 @@ const register = async ({ fullName, email, password, role }) => {
   };
 };
 
-const login = async ({ email, password }) => {
-  const user = await findUserByEmail(email);
+const login = async ({ emailAddress, password }) => {
+  const user = await findUserByEmail(emailAddress);
 
   if (!user) {
     throw new ApiError(401, "Email or password is incorrect");
@@ -56,8 +71,7 @@ const login = async ({ email, password }) => {
 
   const token = signAccessToken({
     sub: user.id,
-    email: user.email,
-    role: user.role,
+    emailAddress: user.email_address,
   });
 
   return {
@@ -66,4 +80,8 @@ const login = async ({ email, password }) => {
   };
 };
 
-module.exports = { register, login, sanitizeUser };
+const logout = async () => ({
+  message: "Logout successful. Remove the bearer token on the client side.",
+});
+
+module.exports = { register, login, logout, sanitizeUser };

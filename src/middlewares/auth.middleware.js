@@ -21,7 +21,7 @@ const authenticate = (req, _res, next) => {
 };
 
 const authorize = (...roles) => (req, _res, next) => {
-  if (!req.user || !roles.includes(req.user.role)) {
+  if (!req.user || !req.user.role || !roles.includes(req.user.role)) {
     return next(new ApiError(403, "Forbidden"));
   }
 
