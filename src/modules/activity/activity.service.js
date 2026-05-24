@@ -3,6 +3,8 @@ const { resolveDateRange, toIsoDate } = require("../../utils/period");
 const {
   formatDateLabel,
   formatHours,
+  formatMonthLabel,
+  normalizeDateValue,
   titleCaseStatus,
   toStressPercent,
 } = require("../../utils/presentation");
@@ -14,6 +16,8 @@ const {
   findHistoryByUserAndDate,
   findHistoriesByRange,
   getAverageFactorsByRange,
+  getHistoryMonthsByUser,
+  getLatestHistoryDateByUser,
 } = require("./activity.repository");
 
 const mapHistory = (row) => ({
@@ -48,41 +52,82 @@ const buildHistoryDetails = (history) => [
 const buildHistoryCard = (history) => ({
   id: history.id,
   date: formatDateLabel(history.date),
+  dateRaw: normalizeDateValue(history.date),
   title: "Daily Activity Log",
   stressStatus: titleCaseStatus(classifyStressLevel(history.stressLevel)),
   stressLevel: toStressPercent(history.stressLevel),
   details: buildHistoryDetails(history),
-  raw: history,
 });
+
+const parseDurationToMinutes = (value) => {
+  if (!value || typeof value !== "string") {
+    return 0;
+  }
+
+  const normalized = value.trim().toLowerCase();
+  const hourMatch = normalized.match(/(\d+(?:\.\d+)?)\s*h/);
+  const minuteMatch = normalized.match(/(\d+(?:\.\d+)?)\s*m/);
+
+  if (hourMatch || minuteMatch) {
+    const hours = hourMatch ? Number(hourMatch[1]) : 0;
+    const minutes = minuteMatch ? Number(minuteMatch[1]) : 0;
+    return Math.round((hours * 60) + minutes);
+  }
+
+  const plainNumberMatch = normalized.match(/(\d+(?:\.\d+)?)/);
+
+  if (plainNumberMatch && normalized.includes("min")) {
+    return Math.round(Number(plainNumberMatch[1]));
+  }
+
+  return 0;
+};
+
+const formatMinutes = (value) => `${Math.round(Number(value || 0))}m`;
 
 const buildSummary = (histories) => {
   if (!histories.length) {
     return [
+      { label: "Avg Exercise", value: "0m" },
       { label: "Avg Screen Time", value: "0.0h" },
       { label: "Avg Sleep Duration", value: "0.0h" },
-      { label: "Avg Work Hours", value: "0.0h" },
       { label: "Avg Stress", value: "0%" },
     ];
   }
 
   const totals = histories.reduce(
     (accumulator, item) => ({
+      exerciseMinutes: accumulator.exerciseMinutes + parseDurationToMinutes(item.physicalActivity),
       screenTime: accumulator.screenTime + item.screenTime,
       sleepHours: accumulator.sleepHours + item.sleepHours,
-      workHours: accumulator.workHours + item.workHours,
       stressLevel: accumulator.stressLevel + item.stressLevel,
     }),
-    { screenTime: 0, sleepHours: 0, workHours: 0, stressLevel: 0 }
+    { exerciseMinutes: 0, screenTime: 0, sleepHours: 0, stressLevel: 0 }
   );
 
   const count = histories.length;
 
   return [
+    { label: "Avg Exercise", value: formatMinutes(totals.exerciseMinutes / count) },
     { label: "Avg Screen Time", value: formatHours(totals.screenTime / count) },
     { label: "Avg Sleep Duration", value: formatHours(totals.sleepHours / count) },
-    { label: "Avg Work Hours", value: formatHours(totals.workHours / count) },
     { label: "Avg Stress", value: `${toStressPercent(totals.stressLevel / count)}%` },
   ];
+};
+
+const buildMonthCard = (monthPath, histories) => {
+  const stressAverage = histories.length
+    ? histories.reduce((total, item) => total + item.stressLevel, 0) / histories.length
+    : 0;
+
+  return {
+    month: formatMonthLabel(`${monthPath}-01`),
+    monthPath,
+    recordedDays: histories.length,
+    stressStatus: titleCaseStatus(classifyStressLevel(stressAverage)),
+    averageStress: `${toStressPercent(stressAverage)}%`,
+    metrics: buildSummary(histories),
+  };
 };
 
 const normalizeActivityPayload = (payload) => ({
@@ -105,7 +150,9 @@ const addActivity = async (userId, payload) => {
   const normalized = normalizeActivityPayload(payload);
 
   if (!normalized.date) {
-    throw new ApiError(400, "date is required");
+    throw new ApiError(400, "Validation failed", [
+      { property: "date", message: "Date is required" },
+    ]);
   }
 
   const existing = await findHistoryByUserAndDate(userId, normalized.date);
@@ -153,13 +200,55 @@ const getActivities = async (userId, query) => {
   const histories = await findHistoriesByRange(userId, range.startDate, range.endDate);
   const items = histories.map(mapHistory);
 
+  if (range.period === "monthly") {
+    return {
+      month: formatMonthLabel(`${range.selectedMonth}-01`),
+      monthPath: range.selectedMonth,
+      summary: buildSummary(items),
+      history: items.slice().reverse().map(buildHistoryCard),
+    };
+  }
+
   return {
     period: range.period,
     range,
     summary: buildSummary(items),
-    history: items.map(buildHistoryCard),
+    history: items.slice().reverse().map(buildHistoryCard),
     items,
   };
+};
+
+const getMonthlyHistories = async (userId) => {
+  const months = await getHistoryMonthsByUser(userId);
+
+  if (!months.length) {
+    return [];
+  }
+
+  const allRows = await Promise.all(
+    months.map((month) =>
+      findHistoriesByRange(userId, `${month.month_path}-01`, month.last_date)
+    )
+  );
+
+  return months.map((month, index) => {
+    const items = allRows[index].map(mapHistory);
+    return buildMonthCard(month.month_path, items);
+  });
+};
+
+const getMonthlyHistoryDetail = async (userId, query = {}) => {
+  let selectedMonth = query.month;
+
+  if (!selectedMonth) {
+    const latestDate = await getLatestHistoryDateByUser(userId);
+    selectedMonth = latestDate ? String(latestDate).slice(0, 7) : toIsoDate(new Date()).slice(0, 7);
+  }
+
+  return getActivities(userId, {
+    period: "monthly",
+    month: selectedMonth,
+  });
 };
 
 const getAverageFactors = async (userId, query) => {
@@ -189,4 +278,14 @@ const getAverageFactors = async (userId, query) => {
   };
 };
 
-module.exports = { addActivity, updateActivity, getActivities, getAverageFactors, mapHistory };
+module.exports = {
+  addActivity,
+  updateActivity,
+  getActivities,
+  getAverageFactors,
+  getMonthlyHistories,
+  getMonthlyHistoryDetail,
+  mapHistory,
+  buildHistoryCard,
+  buildSummary,
+};

@@ -139,6 +139,43 @@ const getAverageFactorsByRange = async (userId, startDate, endDate) => {
   return result.rows[0];
 };
 
+const getHistoryMonthsByUser = async (userId) => {
+  const result = await db.query(
+    `
+      SELECT
+        TO_CHAR(DATE_TRUNC('month', date), 'YYYY-MM') AS month_path,
+        MIN(date) AS first_date,
+        MAX(date) AS last_date,
+        COUNT(*) AS recorded_days,
+        ROUND(AVG(screen_time)::numeric, 2) AS avg_screen_time,
+        ROUND(AVG(sleep_hours)::numeric, 2) AS avg_sleep_hours,
+        ROUND(AVG(stress_level)::numeric, 2) AS avg_stress_level
+      FROM histories
+      WHERE id_user = $1
+      GROUP BY DATE_TRUNC('month', date)
+      ORDER BY DATE_TRUNC('month', date) DESC
+    `,
+    [userId]
+  );
+
+  return result.rows;
+};
+
+const getLatestHistoryDateByUser = async (userId) => {
+  const result = await db.query(
+    `
+      SELECT date
+      FROM histories
+      WHERE id_user = $1
+      ORDER BY date DESC, created_at DESC
+      LIMIT 1
+    `,
+    [userId]
+  );
+
+  return result.rows[0]?.date || null;
+};
+
 module.exports = {
   createHistory,
   findHistoryById,
@@ -146,4 +183,6 @@ module.exports = {
   findHistoryByUserAndDate,
   findHistoriesByRange,
   getAverageFactorsByRange,
+  getHistoryMonthsByUser,
+  getLatestHistoryDateByUser,
 };
