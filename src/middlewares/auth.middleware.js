@@ -7,7 +7,9 @@ const authenticate = (req, _res, next) => {
   const authHeader = req.headers.authorization;
 
   if (!authHeader || !authHeader.startsWith("Bearer ")) {
-    return next(new ApiError(401, "Unauthorized"));
+    return next(new ApiError(401, "Unauthorized", [
+      { property: "authorization", message: "Bearer token is required" },
+    ]));
   }
 
   const token = authHeader.split(" ")[1];
@@ -16,13 +18,17 @@ const authenticate = (req, _res, next) => {
     req.user = jwt.verify(token, env.jwtSecret);
     return next();
   } catch (_error) {
-    return next(new ApiError(401, "Invalid or expired token"));
+    return next(new ApiError(401, "Invalid or expired token", [
+      { property: "authorization", message: "Bearer token is invalid or expired" },
+    ]));
   }
 };
 
 const authorize = (...roles) => (req, _res, next) => {
   if (!req.user || !req.user.role || !roles.includes(req.user.role)) {
-    return next(new ApiError(403, "Forbidden"));
+    return next(new ApiError(403, "Forbidden", [
+      { property: "authorization", message: "You do not have permission to access this resource" },
+    ]));
   }
 
   return next();

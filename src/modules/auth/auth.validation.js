@@ -1,22 +1,43 @@
 const { ApiError } = require("../../utils/api-error");
+const {
+  buildFieldError,
+  buildRequiredError,
+  isBlank,
+  isValidEmailAddress,
+  isValidUsername,
+} = require("../../utils/validation");
 
 const validateRegister = (req, _res, next) => {
-  const { name, emailAddress, password, gender, workLocation } = req.body;
+  const { name, username, emailAddress, password, gender, workLocation } = req.body;
+  const errors = [];
 
-  if (!name || !emailAddress || !password) {
-    return next(new ApiError(400, "name, emailAddress, and password are required"));
+  if (isBlank(name)) errors.push(buildRequiredError("name", "Name"));
+  if (isBlank(username)) errors.push(buildRequiredError("username", "Username"));
+  if (isBlank(emailAddress)) errors.push(buildRequiredError("emailAddress", "Email address"));
+  if (isBlank(password)) errors.push(buildRequiredError("password", "Password"));
+
+  if (!isBlank(emailAddress) && !isValidEmailAddress(emailAddress)) {
+    errors.push(buildFieldError("emailAddress", "Email address must be valid"));
   }
 
-  if (String(password).length < 8) {
-    return next(new ApiError(400, "Password must be at least 8 characters"));
+  if (!isBlank(username) && !isValidUsername(username)) {
+    errors.push(buildFieldError("username", "Username must be 3-50 characters and only contain letters, numbers, or underscore"));
+  }
+
+  if (!isBlank(password) && String(password).length < 8) {
+    errors.push(buildFieldError("password", "Password must be at least 8 characters"));
   }
 
   if (gender && !["male", "female"].includes(gender)) {
-    return next(new ApiError(400, "gender must be male or female"));
+    errors.push(buildFieldError("gender", "Gender must be male or female"));
   }
 
   if (workLocation && !["on_site", "hybrid", "anywhere"].includes(workLocation)) {
-    return next(new ApiError(400, "workLocation must be on_site, hybrid, or anywhere"));
+    errors.push(buildFieldError("workLocation", "Work location must be on_site, hybrid, or anywhere"));
+  }
+
+  if (errors.length) {
+    return next(new ApiError(400, "Validation failed", errors));
   }
 
   return next();
@@ -24,9 +45,17 @@ const validateRegister = (req, _res, next) => {
 
 const validateLogin = (req, _res, next) => {
   const { emailAddress, password } = req.body;
+  const errors = [];
 
-  if (!emailAddress || !password) {
-    return next(new ApiError(400, "emailAddress and password are required"));
+  if (isBlank(emailAddress)) errors.push(buildRequiredError("emailAddress", "Email address"));
+  if (isBlank(password)) errors.push(buildRequiredError("password", "Password"));
+
+  if (!isBlank(emailAddress) && !isValidEmailAddress(emailAddress)) {
+    errors.push(buildFieldError("emailAddress", "Email address must be valid"));
+  }
+
+  if (errors.length) {
+    return next(new ApiError(400, "Validation failed", errors));
   }
 
   return next();

@@ -2,23 +2,26 @@ const bcrypt = require("bcryptjs");
 
 const { ApiError } = require("../../utils/api-error");
 const { signAccessToken } = require("../../utils/jwt");
-const { createUser, findUserByEmail } = require("./auth.repository");
+const { createUser, findUserByEmail, findUserByUsername } = require("./auth.repository");
 
 const sanitizeUser = (user) => ({
   id: user.id,
   name: user.name,
+  username: user.username,
   emailAddress: user.email_address,
   birthDate: user.birth_date,
   gender: user.gender,
   job: user.job,
   workLocation: user.work_location,
   hobby: user.hobby,
+  biodata: user.biodata,
   createdAt: user.created_at,
   updatedAt: user.updated_at,
 });
 
 const register = async ({
   name,
+  username,
   emailAddress,
   password,
   birthDate,
@@ -26,16 +29,29 @@ const register = async ({
   job,
   workLocation,
   hobby,
+  biodata,
 }) => {
+  const normalizedUsername = String(username).toLowerCase();
   const existingUser = await findUserByEmail(emailAddress);
 
   if (existingUser) {
-    throw new ApiError(409, "Email is already registered");
+    throw new ApiError(409, "Email is already registered", [
+      { property: "emailAddress", message: "Email address is already registered" },
+    ]);
+  }
+
+  const existingUsername = await findUserByUsername(normalizedUsername);
+
+  if (existingUsername) {
+    throw new ApiError(409, "Username is already registered", [
+      { property: "username", message: "Username is already registered" },
+    ]);
   }
 
   const hashedPassword = await bcrypt.hash(password, 10);
   const user = await createUser({
     name,
+    username: normalizedUsername,
     emailAddress,
     password: hashedPassword,
     birthDate,
@@ -43,6 +59,7 @@ const register = async ({
     job,
     workLocation,
     hobby,
+    biodata,
   });
 
   const token = signAccessToken({
