@@ -94,7 +94,7 @@
                 ],
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"name\": \"Cahaya Tirta\",\n  \"emailAddress\": \"{{primaryEmail}}\",\n  \"password\": \"{{primaryPassword}}\",\n  \"birthDate\": \"2000-01-01\",\n  \"gender\": \"male\",\n  \"job\": \"Backend Engineer\",\n  \"workLocation\": \"hybrid\",\n  \"hobby\": \"Reading\"\n}"
+                  "raw": "{\n  \"name\": \"Cahaya Tirta\",\n  \"username\": \"{{primaryUsername}}\",\n  \"emailAddress\": \"{{primaryEmail}}\",\n  \"password\": \"{{primaryPassword}}\",\n  \"birthDate\": \"2000-01-01\",\n  \"gender\": \"male\",\n  \"job\": \"Backend Engineer\",\n  \"workLocation\": \"hybrid\",\n  \"hobby\": \"Reading and walking\",\n  \"biodata\": \"Backend engineer who enjoys shipping features with a calm daily rhythm and evening walks.\"\n}"
                 },
                 "url": {
                   "raw": "{{baseUrl}}/api/auth/register",
@@ -177,7 +177,7 @@
                 ],
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"name\": \"Friend Account\",\n  \"emailAddress\": \"{{friendEmail}}\",\n  \"password\": \"{{friendPassword}}\",\n  \"birthDate\": \"2001-02-01\",\n  \"gender\": \"female\",\n  \"job\": \"Designer\",\n  \"workLocation\": \"on_site\",\n  \"hobby\": \"Music\"\n}"
+                  "raw": "{\n  \"name\": \"Friend Account\",\n  \"username\": \"{{friendUsername}}\",\n  \"emailAddress\": \"{{friendEmail}}\",\n  \"password\": \"{{friendPassword}}\",\n  \"birthDate\": \"2001-02-01\",\n  \"gender\": \"female\",\n  \"job\": \"Designer\",\n  \"workLocation\": \"on_site\",\n  \"hobby\": \"Music and journaling\",\n  \"biodata\": \"Designer who keeps a balanced schedule and likes slow evenings.\"\n}"
                 },
                 "url": {
                   "raw": "{{baseUrl}}/api/auth/register",
@@ -435,7 +435,7 @@
                 ],
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"name\": \"Cahaya Tirta Update\",\n  \"job\": \"Software Engineer\",\n  \"workLocation\": \"on_site\",\n  \"hobby\": \"Running\"\n}"
+                  "raw": "{\n  \"name\": \"Cahaya Tirta Update\",\n  \"username\": \"cahayatirta_update\",\n  \"job\": \"Software Engineer\",\n  \"workLocation\": \"on_site\",\n  \"hobby\": \"Running and reading\",\n  \"biodata\": \"Software engineer who is refining a healthier routine while staying productive.\"\n}"
                 },
                 "url": {
                   "raw": "{{baseUrl}}/api/users/profile",
@@ -2218,6 +2218,28 @@
           ]
         }
       ]
+    }
+  ],
+  "event": [
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "if (pm.response.code >= 400) {",
+          "  const jsonData = pm.response.json();",
+          "  pm.test('Error response has message', function () { pm.expect(jsonData.message).to.be.a('string').and.not.empty; });",
+          "  pm.test('Error response has errors array', function () { pm.expect(jsonData.errors).to.be.an('array').and.not.empty; });",
+          "  pm.test('Each error item has property and message', function () {",
+          "    jsonData.errors.forEach(function (item) {",
+          "      pm.expect(item).to.have.property('property');",
+          "      pm.expect(item).to.have.property('message');",
+          "      pm.expect(item.message).to.be.a('string').and.not.empty;",
+          "    });",
+          "  });",
+          "}"
+        ]
+      }
     }
   ]
 }
