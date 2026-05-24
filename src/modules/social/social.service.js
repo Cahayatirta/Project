@@ -1,10 +1,11 @@
 const { ApiError } = require("../../utils/api-error");
 const { resolveDateRange } = require("../../utils/period");
+const { getMonthlyHistoryDetail } = require("../activity/activity.service");
 const {
   titleCaseStatus,
   toStressPercent,
   formatRelativeTime,
-  formatCount,
+  normalizeDateValue,
 } = require("../../utils/presentation");
 const { classifyStressLevel } = require("../../utils/stress");
 const {
@@ -15,6 +16,7 @@ const {
   updateSocialStatus,
   getPendingRequests,
   getAcceptedFriends,
+  getAcceptedFriendById,
   getFriendStats,
   getPermittedFriendAverages,
 } = require("./social.repository");
@@ -24,11 +26,13 @@ const mapSocial = (row) => ({
   sender: {
     id: row.user_sender_id,
     name: row.sender_name,
+    username: row.sender_username,
     emailAddress: row.sender_email_address,
   },
   receiver: {
     id: row.user_receiver_id,
     name: row.receiver_name,
+    username: row.receiver_username,
     emailAddress: row.receiver_email_address,
   },
   status: row.status,
@@ -58,6 +62,7 @@ const sendFriendRequest = async (userId, emailAddress) => {
         friend: {
           id: targetUser.id,
           name: targetUser.name,
+          username: targetUser.username,
           emailAddress,
         },
       };
@@ -71,6 +76,7 @@ const sendFriendRequest = async (userId, emailAddress) => {
         friend: {
           id: targetUser.id,
           name: targetUser.name,
+          username: targetUser.username,
           emailAddress,
         },
       };
@@ -86,6 +92,7 @@ const sendFriendRequest = async (userId, emailAddress) => {
         friend: {
           id: targetUser.id,
           name: targetUser.name,
+          username: targetUser.username,
           emailAddress,
         },
       };
@@ -101,6 +108,7 @@ const sendFriendRequest = async (userId, emailAddress) => {
     friend: {
       id: targetUser.id,
       name: targetUser.name,
+      username: targetUser.username,
       emailAddress,
     },
   };
@@ -163,12 +171,17 @@ const listFriends = async (userId) => {
   const friends = items.map((item) => ({
     id: item.friend_id,
     name: item.friend_name,
+    username: item.friend_username,
     emailAddress: item.friend_email_address,
     friendshipId: item.id,
     status: item.status,
+    biodata: item.friend_biodata,
+    job: item.friend_job,
+    workLocation: item.friend_work_location,
+    hobby: item.friend_hobby,
     stressStatus: item.last_stress_level === null ? "No Activity" : titleCaseStatus(classifyStressLevel(item.last_stress_level)),
     time: formatRelativeTime(item.last_activity_created_at),
-    lastActivityDate: item.last_activity_date,
+    lastActivityDate: normalizeDateValue(item.last_activity_date),
     stressLevel: item.last_stress_level === null ? 0 : toStressPercent(item.last_stress_level),
     createdAt: item.created_at,
   }));
@@ -188,7 +201,9 @@ const getFriendListStats = async (userId) => {
 
 const getFriendAveragesByPermission = async (userId, query) => {
   if (!query.groupId) {
-    throw new ApiError(400, "groupId is required");
+    throw new ApiError(400, "Validation failed", [
+      { property: "groupId", message: "Group ID is required" },
+    ]);
   }
 
   const range = resolveDateRange(query);
@@ -232,13 +247,14 @@ const getSocialOverview = async (userId) => {
 
   return {
     summary: [
-      { label: "Total Friends", value: formatCount(stats.totalFriend) },
-      { label: "Refreshed", value: formatCount(stats.totalRefreshedFriend) },
-      { label: "Near-Burnout", value: formatCount(stats.totalNearBurnoutFriend) },
+      { label: "Total Friends", value: stats.totalFriend },
+      { label: "Refreshed", value: stats.totalRefreshedFriend },
+      { label: "Near-Burnout", value: stats.totalNearBurnoutFriend },
     ],
     friends: friends.map((friend) => ({
       id: friend.id,
       name: friend.name,
+      username: friend.username,
       status: friend.stressStatus,
       time: friend.time,
       stressLevel: friend.stressLevel,
@@ -247,6 +263,33 @@ const getSocialOverview = async (userId) => {
     })),
     stats,
     items: friends,
+  };
+};
+
+const getFriendHistoryDetail = async (userId, friendId, query = {}) => {
+  const friend = await getAcceptedFriendById(userId, friendId);
+
+  if (!friend) {
+    throw new ApiError(404, "Friend not found");
+  }
+
+  const histories = await getMonthlyHistoryDetail(friendId, query);
+
+  return {
+    friend: {
+      id: friend.friend_id,
+      name: friend.friend_name,
+      username: friend.friend_username,
+      emailAddress: friend.friend_email_address,
+      biodata: friend.friend_biodata,
+      job: friend.friend_job,
+      workLocation: friend.friend_work_location,
+      hobby: friend.friend_hobby,
+      status: friend.last_stress_level === null ? "No Activity" : titleCaseStatus(classifyStressLevel(friend.last_stress_level)),
+      time: formatRelativeTime(friend.last_activity_created_at),
+      stressLevel: friend.last_stress_level === null ? 0 : toStressPercent(friend.last_stress_level),
+    },
+    histories,
   };
 };
 
@@ -259,4 +302,5 @@ module.exports = {
   getFriendListStats,
   getFriendAveragesByPermission,
   getSocialOverview,
+  getFriendHistoryDetail,
 };

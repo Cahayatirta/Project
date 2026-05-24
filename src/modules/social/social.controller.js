@@ -7,6 +7,7 @@ const {
   getSocialOverview,
   getFriendListStats,
   getFriendAveragesByPermission,
+  getFriendHistoryDetail,
 } = require("./social.service");
 
 const addFriendHandler = asyncHandler(async (req, res) => {
@@ -81,6 +82,15 @@ const getFriendAveragesByPermissionHandler = asyncHandler(async (req, res) => {
   });
 });
 
+const getFriendHistoryDetailHandler = asyncHandler(async (req, res) => {
+  const data = await getFriendHistoryDetail(req.user.sub, req.params.friendId, req.query);
+
+  res.status(200).json({
+    message: "Friend history detail fetched successfully",
+    data,
+  });
+});
+
 module.exports = {
   addFriendHandler,
   getFriendRequestsHandler,
@@ -90,4 +100,5 @@ module.exports = {
   listFriendsHandler,
   getFriendStatsHandler,
   getFriendAveragesByPermissionHandler,
+  getFriendHistoryDetailHandler,
 };

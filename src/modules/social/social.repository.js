@@ -9,8 +9,10 @@ const socialSelect = `
     s.created_at,
     s.updated_at,
     sender.name AS sender_name,
+    sender.username AS sender_username,
     sender.email_address AS sender_email_address,
     receiver.name AS receiver_name,
+    receiver.username AS receiver_username,
     receiver.email_address AS receiver_email_address
   FROM socials s
   JOIN users sender ON sender.id = s.user_sender_id
@@ -19,7 +21,7 @@ const socialSelect = `
 
 const findUserByEmail = async (emailAddress) => {
   const result = await db.query(
-    `SELECT id, name, email_address FROM users WHERE email_address = $1`,
+    `SELECT id, name, username, email_address, biodata FROM users WHERE email_address = $1`,
     [emailAddress]
   );
 
@@ -105,9 +107,29 @@ const getAcceptedFriends = async (userId) => {
           ELSE sender.name
         END AS friend_name,
         CASE
+          WHEN s.user_sender_id = $1 THEN receiver.username
+          ELSE sender.username
+        END AS friend_username,
+        CASE
           WHEN s.user_sender_id = $1 THEN receiver.email_address
           ELSE sender.email_address
         END AS friend_email_address,
+        CASE
+          WHEN s.user_sender_id = $1 THEN receiver.job
+          ELSE sender.job
+        END AS friend_job,
+        CASE
+          WHEN s.user_sender_id = $1 THEN receiver.work_location
+          ELSE sender.work_location
+        END AS friend_work_location,
+        CASE
+          WHEN s.user_sender_id = $1 THEN receiver.hobby
+          ELSE sender.hobby
+        END AS friend_hobby,
+        CASE
+          WHEN s.user_sender_id = $1 THEN receiver.biodata
+          ELSE sender.biodata
+        END AS friend_biodata,
         last_history.date AS last_activity_date,
         last_history.created_at AS last_activity_created_at,
         last_history.stress_level AS last_stress_level
@@ -132,6 +154,76 @@ const getAcceptedFriends = async (userId) => {
   );
 
   return result.rows;
+};
+
+const getAcceptedFriendById = async (userId, friendId) => {
+  const result = await db.query(
+    `
+      SELECT
+        s.id,
+        s.status,
+        CASE
+          WHEN s.user_sender_id = $1 THEN receiver.id
+          ELSE sender.id
+        END AS friend_id,
+        CASE
+          WHEN s.user_sender_id = $1 THEN receiver.name
+          ELSE sender.name
+        END AS friend_name,
+        CASE
+          WHEN s.user_sender_id = $1 THEN receiver.username
+          ELSE sender.username
+        END AS friend_username,
+        CASE
+          WHEN s.user_sender_id = $1 THEN receiver.email_address
+          ELSE sender.email_address
+        END AS friend_email_address,
+        CASE
+          WHEN s.user_sender_id = $1 THEN receiver.job
+          ELSE sender.job
+        END AS friend_job,
+        CASE
+          WHEN s.user_sender_id = $1 THEN receiver.work_location
+          ELSE sender.work_location
+        END AS friend_work_location,
+        CASE
+          WHEN s.user_sender_id = $1 THEN receiver.hobby
+          ELSE sender.hobby
+        END AS friend_hobby,
+        CASE
+          WHEN s.user_sender_id = $1 THEN receiver.biodata
+          ELSE sender.biodata
+        END AS friend_biodata,
+        last_history.date AS last_activity_date,
+        last_history.created_at AS last_activity_created_at,
+        last_history.stress_level AS last_stress_level
+      FROM socials s
+      JOIN users sender ON sender.id = s.user_sender_id
+      JOIN users receiver ON receiver.id = s.user_receiver_id
+      LEFT JOIN LATERAL (
+        SELECT h.date, h.created_at, h.stress_level
+        FROM histories h
+        WHERE h.id_user = CASE
+          WHEN s.user_sender_id = $1 THEN s.user_receiver_id
+          ELSE s.user_sender_id
+        END
+        ORDER BY h.created_at DESC, h.date DESC
+        LIMIT 1
+      ) last_history ON true
+      WHERE (s.user_sender_id = $1 OR s.user_receiver_id = $1)
+        AND s.status = 'accepted'
+        AND (
+          CASE
+            WHEN s.user_sender_id = $1 THEN s.user_receiver_id
+            ELSE s.user_sender_id
+          END
+        ) = $2
+      LIMIT 1
+    `,
+    [userId, friendId]
+  );
+
+  return result.rows[0] || null;
 };
 
 const getFriendStats = async (userId) => {
@@ -239,6 +331,7 @@ module.exports = {
   updateSocialStatus,
   getPendingRequests,
   getAcceptedFriends,
+  getAcceptedFriendById,
   getFriendStats,
   getPermittedFriendAverages,
 };
