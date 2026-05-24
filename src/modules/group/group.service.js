@@ -22,7 +22,9 @@ const ensureGroupOwner = async (groupId, ownerId) => {
 
 const createGroup = async (ownerId, payload) => {
   if (!payload.groupName) {
-    throw new ApiError(400, "groupName is required");
+    throw new ApiError(400, "Validation failed", [
+      { property: "groupName", message: "Group name is required" },
+    ]);
   }
 
   const group = await createGroupWithDefaults(ownerId, payload.groupName);

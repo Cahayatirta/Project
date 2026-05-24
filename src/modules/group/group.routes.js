@@ -1,6 +1,7 @@
 const express = require("express");
 
 const { authenticate } = require("../../middlewares/auth.middleware");
+const { validateAddFriendToGroup, validateCreateGroup } = require("./group.validation");
 const {
   createGroupHandler,
   addFriendToGroupHandler,
@@ -12,8 +13,8 @@ const {
 const router = express.Router();
 
 router.use(authenticate);
-router.post("/", createGroupHandler);
-router.post("/:groupId/members", addFriendToGroupHandler);
+router.post("/", validateCreateGroup, createGroupHandler);
+router.post("/:groupId/members", validateAddFriendToGroup, addFriendToGroupHandler);
 router.delete("/:groupId/members/:userId", removeFriendFromGroupHandler);
 router.get("/:groupId/members", getGroupMembersHandler);
 router.patch("/:groupId/permissions", editGroupPermissionsHandler);
