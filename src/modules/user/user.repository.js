@@ -6,12 +6,14 @@ const findUserById = async (id) => {
       SELECT
         id,
         name,
+        username,
         email_address,
         birth_date,
         gender,
         job,
         work_location,
         hobby,
+        biodata,
         created_at,
         updated_at
       FROM users
@@ -41,12 +43,14 @@ const updateUserById = async (id, payload) => {
       RETURNING
         id,
         name,
+        username,
         email_address,
         birth_date,
         gender,
         job,
         work_location,
         hobby,
+        biodata,
         created_at,
         updated_at
     `,
@@ -56,4 +60,29 @@ const updateUserById = async (id, payload) => {
   return result.rows[0] || null;
 };
 
-module.exports = { findUserById, updateUserById };
+const findUserByUsername = async (username) => {
+  const result = await db.query(
+    `
+      SELECT
+        id,
+        name,
+        username,
+        email_address,
+        birth_date,
+        gender,
+        job,
+        work_location,
+        hobby,
+        biodata,
+        created_at,
+        updated_at
+      FROM users
+      WHERE username = $1
+    `,
+    [username]
+  );
+
+  return result.rows[0] || null;
+};
+
+module.exports = { findUserById, updateUserById, findUserByUsername };
