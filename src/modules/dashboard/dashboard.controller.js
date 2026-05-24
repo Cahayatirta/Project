@@ -1,9 +1,19 @@
 const { asyncHandler } = require("../../utils/async-handler");
 const {
+  getDashboardOverview,
   getDashboardDailyActivity,
   getStressSummary,
   getActivityRecommendation,
 } = require("./dashboard.service");
+
+const getDashboardOverviewHandler = asyncHandler(async (req, res) => {
+  const data = await getDashboardOverview(req.user.sub, req.query);
+
+  res.status(200).json({
+    message: "Dashboard overview fetched successfully",
+    data,
+  });
+});
 
 const getDashboardDailyActivityHandler = asyncHandler(async (req, res) => {
   const data = await getDashboardDailyActivity(req.user.sub, req.query);
@@ -33,6 +43,7 @@ const getActivityRecommendationHandler = asyncHandler(async (req, res) => {
 });
 
 module.exports = {
+  getDashboardOverviewHandler,
   getDashboardDailyActivityHandler,
   getStressSummaryHandler,
   getActivityRecommendationHandler,

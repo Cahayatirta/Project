@@ -1,6 +1,7 @@
 const { ApiError } = require("../../utils/api-error");
 const { toIsoDate } = require("../../utils/period");
 const { classifyStressLevel } = require("../../utils/stress");
+const { buildHistoryCard } = require("../activity/activity.service");
 const {
   titleCaseStatus,
   toStressPercent,
@@ -187,7 +188,47 @@ const getActivityRecommendation = async (userId, query) => {
   };
 };
 
+const getDashboardOverview = async (userId, query) => {
+  const selectedDate = toIsoDate(query.date || new Date());
+  const [stressSummary, recommendationResult] = await Promise.all([
+    getStressSummary(userId, { date: selectedDate }),
+    getActivityRecommendation(userId, { date: selectedDate }),
+  ]);
+
+  const histories = await getHistoriesForLastThirtyDays(userId, selectedDate);
+
+  return {
+    summary: {
+      Refreshed: stressSummary.totals.refreshed,
+      Strained: stressSummary.totals.strained,
+      "Near-Burnout": stressSummary.totals.nearBurnout,
+    },
+    histories: histories
+      .map((history) =>
+        buildHistoryCard({
+          id: history.id,
+          date: history.date,
+          screenTime: Number(history.screen_time),
+          sleepHours: Number(history.sleep_hours),
+          stressLevel: Number(history.stress_level),
+          physicalActivity: history.physical_activity,
+          caffeineIntake: Number(history.caffeine_intake),
+          workHours: Number(history.work_hours),
+          mood: history.mood,
+        })
+      )
+      .reverse(),
+    shap: [],
+    recommendation: {
+      date: selectedDate,
+      source: recommendationResult.source,
+      text: recommendationResult.recommendation,
+    },
+  };
+};
+
 module.exports = {
+  getDashboardOverview,
   getDashboardDailyActivity,
   getStressSummary,
   getActivityRecommendation,

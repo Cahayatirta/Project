@@ -2,6 +2,7 @@ const express = require("express");
 
 const { authenticate } = require("../../middlewares/auth.middleware");
 const {
+  getDashboardOverviewHandler,
   getDashboardDailyActivityHandler,
   getStressSummaryHandler,
   getActivityRecommendationHandler,
@@ -10,6 +11,7 @@ const {
 const router = express.Router();
 
 router.use(authenticate);
+router.get("/", getDashboardOverviewHandler);
 router.get("/activity/daily", getDashboardDailyActivityHandler);
 router.get("/stress-summary", getStressSummaryHandler);
 router.get("/recommendation", getActivityRecommendationHandler);
