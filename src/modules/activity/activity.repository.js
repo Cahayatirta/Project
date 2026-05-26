@@ -6,6 +6,7 @@ const historyColumns = `
   date,
   screen_time,
   sleep_hours,
+  stress_status,
   stress_level,
   wellness_index,
   sleep_quality,
@@ -28,6 +29,7 @@ const createHistory = async (payload) => {
         date,
         screen_time,
         sleep_hours,
+        stress_status,
         stress_level,
         wellness_index,
         sleep_quality,
@@ -39,7 +41,7 @@ const createHistory = async (payload) => {
         work_hours,
         mood
       )
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)
       RETURNING ${historyColumns}
     `,
     [
@@ -47,6 +49,7 @@ const createHistory = async (payload) => {
       payload.date,
       payload.screenTime,
       payload.sleepHours,
+      payload.stressStatus,
       payload.stressLevel,
       payload.wellnessIndex,
       payload.sleepQuality,
@@ -123,7 +126,7 @@ const getAverageFactorsByRange = async (userId, startDate, endDate) => {
       SELECT
         ROUND(AVG(screen_time)::numeric, 2) AS avg_screen_time,
         ROUND(AVG(sleep_hours)::numeric, 2) AS avg_sleep_hours,
-        ROUND(AVG(stress_level)::numeric, 2) AS avg_stress_level,
+        MODE() WITHIN GROUP (ORDER BY stress_status) AS dominant_stress_status,
         ROUND(AVG(wellness_index)::numeric, 2) AS avg_wellness_index,
         ROUND(AVG(sleep_quality)::numeric, 2) AS avg_sleep_quality,
         ROUND(AVG(fatigue_score)::numeric, 2) AS avg_fatigue_score,
@@ -149,7 +152,7 @@ const getHistoryMonthsByUser = async (userId) => {
         COUNT(*) AS recorded_days,
         ROUND(AVG(screen_time)::numeric, 2) AS avg_screen_time,
         ROUND(AVG(sleep_hours)::numeric, 2) AS avg_sleep_hours,
-        ROUND(AVG(stress_level)::numeric, 2) AS avg_stress_level
+        MODE() WITHIN GROUP (ORDER BY stress_status) AS dominant_stress_status
       FROM histories
       WHERE id_user = $1
       GROUP BY DATE_TRUNC('month', date)

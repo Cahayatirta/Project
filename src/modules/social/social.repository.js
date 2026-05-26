@@ -132,12 +132,12 @@ const getAcceptedFriends = async (userId) => {
         END AS friend_biodata,
         last_history.date AS last_activity_date,
         last_history.created_at AS last_activity_created_at,
-        last_history.stress_level AS last_stress_level
+        last_history.stress_status AS last_stress_status
       FROM socials s
       JOIN users sender ON sender.id = s.user_sender_id
       JOIN users receiver ON receiver.id = s.user_receiver_id
       LEFT JOIN LATERAL (
-        SELECT h.date, h.created_at, h.stress_level
+        SELECT h.date, h.created_at, h.stress_status
         FROM histories h
         WHERE h.id_user = CASE
           WHEN s.user_sender_id = $1 THEN s.user_receiver_id
@@ -196,12 +196,12 @@ const getAcceptedFriendById = async (userId, friendId) => {
         END AS friend_biodata,
         last_history.date AS last_activity_date,
         last_history.created_at AS last_activity_created_at,
-        last_history.stress_level AS last_stress_level
+        last_history.stress_status AS last_stress_status
       FROM socials s
       JOIN users sender ON sender.id = s.user_sender_id
       JOIN users receiver ON receiver.id = s.user_receiver_id
       LEFT JOIN LATERAL (
-        SELECT h.date, h.created_at, h.stress_level
+        SELECT h.date, h.created_at, h.stress_status
         FROM histories h
         WHERE h.id_user = CASE
           WHEN s.user_sender_id = $1 THEN s.user_receiver_id
@@ -229,33 +229,34 @@ const getAcceptedFriendById = async (userId, friendId) => {
 const getFriendStats = async (userId) => {
   const result = await db.query(
     `
-      WITH friend_histories AS (
+      WITH latest_friend_histories AS (
         SELECT
           CASE
             WHEN s.user_sender_id = $1 THEN s.user_receiver_id
             ELSE s.user_sender_id
           END AS friend_id,
-          h.stress_level
+          latest_history.stress_status
         FROM socials s
-        JOIN histories h
-          ON h.id_user = CASE
+        LEFT JOIN LATERAL (
+          SELECT h.stress_status
+          FROM histories h
+          WHERE h.id_user = CASE
             WHEN s.user_sender_id = $1 THEN s.user_receiver_id
             ELSE s.user_sender_id
           END
+            AND h.date >= CURRENT_DATE - INTERVAL '30 day'
+          ORDER BY h.date DESC, h.created_at DESC
+          LIMIT 1
+        ) latest_history ON true
         WHERE (s.user_sender_id = $1 OR s.user_receiver_id = $1)
           AND s.status = 'accepted'
-          AND h.date >= CURRENT_DATE - INTERVAL '30 day'
-      ),
-      friend_groups AS (
-        SELECT friend_id, ROUND(AVG(stress_level)::numeric, 2) AS avg_stress
-        FROM friend_histories
-        GROUP BY friend_id
       )
       SELECT
         (SELECT COUNT(*) FROM socials WHERE (user_sender_id = $1 OR user_receiver_id = $1) AND status = 'accepted') AS total_friend,
-        COUNT(*) FILTER (WHERE avg_stress < 4) AS total_refreshed_friend,
-        COUNT(*) FILTER (WHERE avg_stress >= 7) AS total_near_burnout_friend
-      FROM friend_groups
+        COUNT(*) FILTER (WHERE stress_status = 'relaxed') AS total_relaxed_friend,
+        COUNT(*) FILTER (WHERE stress_status = 'normal') AS total_normal_friend,
+        COUNT(*) FILTER (WHERE stress_status = 'exhausted') AS total_exhausted_friend
+      FROM latest_friend_histories
     `,
     [userId]
   );

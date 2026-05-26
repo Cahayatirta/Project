@@ -4,11 +4,13 @@ const { getMonthlyHistoryDetail } = require("../activity/activity.service");
 const { syncAcceptedFriendToDefaultGroup } = require("../group/group.service");
 const {
   titleCaseStatus,
-  toStressPercent,
   formatRelativeTime,
   normalizeDateValue,
 } = require("../../utils/presentation");
-const { classifyStressLevel } = require("../../utils/stress");
+const {
+  deriveStressStatusFromLegacyScore,
+  normalizeStressStatus,
+} = require("../../utils/stress");
 const {
   findUserByEmail,
   findSocialBetweenUsers,
@@ -188,10 +190,14 @@ const listFriends = async (userId) => {
     job: item.friend_job,
     workLocation: item.friend_work_location,
     hobby: item.friend_hobby,
-    stressStatus: item.last_stress_level === null ? "No Activity" : titleCaseStatus(classifyStressLevel(item.last_stress_level)),
+    stressStatus: item.last_stress_status === null
+      ? "No Activity"
+      : titleCaseStatus(normalizeStressStatus(item.last_stress_status || deriveStressStatusFromLegacyScore(item.last_stress_level))),
     time: formatRelativeTime(item.last_activity_created_at),
     lastActivityDate: normalizeDateValue(item.last_activity_date),
-    stressLevel: item.last_stress_level === null ? 0 : toStressPercent(item.last_stress_level),
+    stressLevel: item.last_stress_status === null
+      ? null
+      : normalizeStressStatus(item.last_stress_status || deriveStressStatusFromLegacyScore(item.last_stress_level)),
     createdAt: item.created_at,
   }));
 
@@ -203,8 +209,9 @@ const getFriendListStats = async (userId) => {
 
   return {
     totalFriend: Number(stats.total_friend || 0),
-    totalRefreshedFriend: Number(stats.total_refreshed_friend || 0),
-    totalNearBurnoutFriend: Number(stats.total_near_burnout_friend || 0),
+    totalRelaxedFriend: Number(stats.total_relaxed_friend || 0),
+    totalNormalFriend: Number(stats.total_normal_friend || 0),
+    totalExhaustedFriend: Number(stats.total_exhausted_friend || 0),
   };
 };
 
@@ -257,8 +264,9 @@ const getSocialOverview = async (userId) => {
   return {
     summary: [
       { label: "Total Friends", value: stats.totalFriend },
-      { label: "Refreshed", value: stats.totalRefreshedFriend },
-      { label: "Near-Burnout", value: stats.totalNearBurnoutFriend },
+      { label: "Relaxed", value: stats.totalRelaxedFriend },
+      { label: "Normal", value: stats.totalNormalFriend },
+      { label: "Exhausted", value: stats.totalExhaustedFriend },
     ],
     friends: friends.map((friend) => ({
       id: friend.id,
@@ -294,9 +302,13 @@ const getFriendHistoryDetail = async (userId, friendId, query = {}) => {
       job: friend.friend_job,
       workLocation: friend.friend_work_location,
       hobby: friend.friend_hobby,
-      status: friend.last_stress_level === null ? "No Activity" : titleCaseStatus(classifyStressLevel(friend.last_stress_level)),
+      status: friend.last_stress_status === null
+        ? "No Activity"
+        : titleCaseStatus(normalizeStressStatus(friend.last_stress_status || deriveStressStatusFromLegacyScore(friend.last_stress_level))),
       time: formatRelativeTime(friend.last_activity_created_at),
-      stressLevel: friend.last_stress_level === null ? 0 : toStressPercent(friend.last_stress_level),
+      stressLevel: friend.last_stress_status === null
+        ? null
+        : normalizeStressStatus(friend.last_stress_status || deriveStressStatusFromLegacyScore(friend.last_stress_level)),
     },
     histories,
   };

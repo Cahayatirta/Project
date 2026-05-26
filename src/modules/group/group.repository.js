@@ -191,6 +191,7 @@ const listGroupsByOwnerId = async (ownerId) => {
       SELECT
         g.id,
         g.id_user,
+        owner.username AS owner_username,
         g.group_name,
         g.is_default,
         g.description,
@@ -209,12 +210,14 @@ const listGroupsByOwnerId = async (ownerId) => {
         p.can_view_work_hours,
         p.can_view_mood
       FROM groups g
+      JOIN users owner ON owner.id = g.id_user
       LEFT JOIN group_members gm ON gm.id_group = g.id
       LEFT JOIN group_history_permissions p ON p.id_group = g.id
       WHERE g.id_user = $1
       GROUP BY
         g.id,
         g.id_user,
+        owner.username,
         g.group_name,
         g.is_default,
         g.description,

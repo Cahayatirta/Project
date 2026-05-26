@@ -54,4 +54,42 @@ const resolveDateRange = ({ period = "daily", date, month }) => {
   ]);
 };
 
-module.exports = { resolveDateRange, toIsoDate };
+const resolveRollingWindowRange = ({ startDate, endDate, date, defaultDays = 30 }) => {
+  if ((startDate && !endDate) || (!startDate && endDate)) {
+    throw new ApiError(400, "Validation failed", [
+      {
+        property: startDate ? "endDate" : "startDate",
+        message: "startDate and endDate must be provided together",
+      },
+    ]);
+  }
+
+  if (startDate && endDate) {
+    const normalizedStartDate = toIsoDate(startDate);
+    const normalizedEndDate = toIsoDate(endDate);
+
+    if (normalizedStartDate > normalizedEndDate) {
+      throw new ApiError(400, "Validation failed", [
+        { property: "startDate", message: "startDate must be earlier than or equal to endDate" },
+      ]);
+    }
+
+    return {
+      startDate: normalizedStartDate,
+      endDate: normalizedEndDate,
+      isDefaultRange: false,
+    };
+  }
+
+  const normalizedEndDate = toIsoDate(date || new Date());
+  const end = new Date(`${normalizedEndDate}T00:00:00.000Z`);
+  end.setUTCDate(end.getUTCDate() - (defaultDays - 1));
+
+  return {
+    startDate: end.toISOString().slice(0, 10),
+    endDate: normalizedEndDate,
+    isDefaultRange: true,
+  };
+};
+
+module.exports = { resolveDateRange, resolveRollingWindowRange, toIsoDate };

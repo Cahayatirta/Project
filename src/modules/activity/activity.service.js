@@ -6,9 +6,13 @@ const {
   formatMonthLabel,
   normalizeDateValue,
   titleCaseStatus,
-  toStressPercent,
 } = require("../../utils/presentation");
-const { classifyStressLevel } = require("../../utils/stress");
+const {
+  deriveStressStatusFromLegacyScore,
+  generateStressStatusFromSignals,
+  getDominantStressStatus,
+  normalizeStressStatus,
+} = require("../../utils/stress");
 const {
   createHistory,
   findHistoryById,
@@ -26,7 +30,7 @@ const mapHistory = (row) => ({
   date: row.date,
   screenTime: Number(row.screen_time),
   sleepHours: Number(row.sleep_hours),
-  stressLevel: Number(row.stress_level),
+  stressLevel: normalizeStressStatus(row.stress_status || deriveStressStatusFromLegacyScore(row.stress_level)),
   wellnessIndex: Number(row.wellness_index),
   sleepQuality: Number(row.sleep_quality),
   fatigueScore: Number(row.fatigue_score),
@@ -54,8 +58,8 @@ const buildHistoryCard = (history) => ({
   date: formatDateLabel(history.date),
   dateRaw: normalizeDateValue(history.date),
   title: "Daily Activity Log",
-  stressStatus: titleCaseStatus(classifyStressLevel(history.stressLevel)),
-  stressLevel: toStressPercent(history.stressLevel),
+  stressStatus: titleCaseStatus(history.stressLevel),
+  stressLevel: history.stressLevel,
   details: buildHistoryDetails(history),
 });
 
@@ -91,7 +95,7 @@ const buildSummary = (histories) => {
       { label: "Avg Exercise", value: "0m" },
       { label: "Avg Screen Time", value: "0.0h" },
       { label: "Avg Sleep Duration", value: "0.0h" },
-      { label: "Avg Stress", value: "0%" },
+      { label: "Stress Level", value: "Normal" },
     ];
   }
 
@@ -100,9 +104,9 @@ const buildSummary = (histories) => {
       exerciseMinutes: accumulator.exerciseMinutes + parseDurationToMinutes(item.physicalActivity),
       screenTime: accumulator.screenTime + item.screenTime,
       sleepHours: accumulator.sleepHours + item.sleepHours,
-      stressLevel: accumulator.stressLevel + item.stressLevel,
+      stressLevels: [...accumulator.stressLevels, item.stressLevel],
     }),
-    { exerciseMinutes: 0, screenTime: 0, sleepHours: 0, stressLevel: 0 }
+    { exerciseMinutes: 0, screenTime: 0, sleepHours: 0, stressLevels: [] }
   );
 
   const count = histories.length;
@@ -111,21 +115,21 @@ const buildSummary = (histories) => {
     { label: "Avg Exercise", value: formatMinutes(totals.exerciseMinutes / count) },
     { label: "Avg Screen Time", value: formatHours(totals.screenTime / count) },
     { label: "Avg Sleep Duration", value: formatHours(totals.sleepHours / count) },
-    { label: "Avg Stress", value: `${toStressPercent(totals.stressLevel / count)}%` },
+    { label: "Stress Level", value: titleCaseStatus(getDominantStressStatus(totals.stressLevels)) },
   ];
 };
 
 const buildMonthCard = (monthPath, histories) => {
-  const stressAverage = histories.length
-    ? histories.reduce((total, item) => total + item.stressLevel, 0) / histories.length
-    : 0;
+  const dominantStressLevel = histories.length
+    ? getDominantStressStatus(histories.map((item) => item.stressLevel))
+    : "normal";
 
   return {
     month: formatMonthLabel(`${monthPath}-01`),
     monthPath,
     recordedDays: histories.length,
-    stressStatus: titleCaseStatus(classifyStressLevel(stressAverage)),
-    averageStress: `${toStressPercent(stressAverage)}%`,
+    stressStatus: titleCaseStatus(dominantStressLevel),
+    stressLevel: dominantStressLevel,
     metrics: buildSummary(histories),
   };
 };
@@ -134,7 +138,6 @@ const normalizeActivityPayload = (payload) => ({
   date: payload.date ? toIsoDate(payload.date) : undefined,
   screenTime: payload.screenTime ?? 0,
   sleepHours: payload.sleepHours ?? 0,
-  stressLevel: payload.stressLevel ?? 0,
   wellnessIndex: payload.wellnessIndex ?? 0,
   sleepQuality: payload.sleepQuality ?? 0,
   fatigueScore: payload.fatigueScore ?? 0,
@@ -144,6 +147,8 @@ const normalizeActivityPayload = (payload) => ({
   caffeineIntake: payload.caffeineIntake ?? 0,
   workHours: payload.workHours ?? 0,
   mood: payload.mood ?? null,
+  stressStatus: generateStressStatusFromSignals(payload),
+  stressLevel: 0,
 });
 
 const addActivity = async (userId, payload) => {
@@ -180,7 +185,14 @@ const updateActivity = async (userId, historyId, payload) => {
     date: payload.date ? toIsoDate(payload.date) : undefined,
     screen_time: payload.screenTime,
     sleep_hours: payload.sleepHours,
-    stress_level: payload.stressLevel,
+    stress_status: generateStressStatusFromSignals({
+      screenTime: payload.screenTime ?? history.screen_time,
+      sleepHours: payload.sleepHours ?? history.sleep_hours,
+      caffeineIntake: payload.caffeineIntake ?? history.caffeine_intake,
+      workHours: payload.workHours ?? history.work_hours,
+      physicalActivity: payload.physicalActivity ?? history.physical_activity,
+      mood: payload.mood ?? history.mood,
+    }),
     wellness_index: payload.wellnessIndex,
     sleep_quality: payload.sleepQuality,
     fatigue_score: payload.fatigueScore,
@@ -262,12 +274,12 @@ const getAverageFactors = async (userId, query) => {
       { label: "Avg Screen Time", value: formatHours(averages.avg_screen_time || 0) },
       { label: "Avg Sleep Duration", value: formatHours(averages.avg_sleep_hours || 0) },
       { label: "Avg Work Hours", value: formatHours(averages.avg_work_hours || 0) },
-      { label: "Avg Stress", value: `${toStressPercent(averages.avg_stress_level || 0)}%` },
+      { label: "Stress Level", value: titleCaseStatus(averages.dominant_stress_status || "normal") },
     ],
     averages: {
       screenTime: Number(averages.avg_screen_time || 0),
       sleepHours: Number(averages.avg_sleep_hours || 0),
-      stressLevel: Number(averages.avg_stress_level || 0),
+      stressLevel: normalizeStressStatus(averages.dominant_stress_status),
       wellnessIndex: Number(averages.avg_wellness_index || 0),
       sleepQuality: Number(averages.avg_sleep_quality || 0),
       fatigueScore: Number(averages.avg_fatigue_score || 0),

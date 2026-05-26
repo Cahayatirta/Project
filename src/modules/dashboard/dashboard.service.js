@@ -1,21 +1,24 @@
 const { ApiError } = require("../../utils/api-error");
-const { toIsoDate } = require("../../utils/period");
-const { classifyStressLevel } = require("../../utils/stress");
+const { resolveRollingWindowRange, toIsoDate } = require("../../utils/period");
+const {
+  deriveStressStatusFromLegacyScore,
+  getDominantStressStatus,
+  normalizeStressStatus,
+} = require("../../utils/stress");
 const { buildHistoryCard } = require("../activity/activity.service");
 const {
   titleCaseStatus,
-  toStressPercent,
-  formatDateLabel,
   formatHours,
+  normalizeDateValue,
 } = require("../../utils/presentation");
-const { getDailyActivity, getHistoriesForLastThirtyDays } = require("./dashboard.repository");
+const { getDailyActivity, getHistoriesByDateRange } = require("./dashboard.repository");
 
 const mapDailyActivity = (row) => ({
   id: row.id,
   date: row.date,
   screenTime: Number(row.screen_time),
   sleepHours: Number(row.sleep_hours),
-  stressLevel: Number(row.stress_level),
+  stressLevel: normalizeStressStatus(row.stress_status || deriveStressStatusFromLegacyScore(row.stress_level)),
   wellnessIndex: Number(row.wellness_index),
   sleepQuality: Number(row.sleep_quality),
   fatigueScore: Number(row.fatigue_score),
@@ -53,50 +56,43 @@ const getDashboardDailyActivity = async (userId, query) => {
 };
 
 const getStressSummary = async (userId, query) => {
-  const selectedDate = toIsoDate(query.date || new Date());
-  const histories = await getHistoriesForLastThirtyDays(userId, selectedDate);
+  const range = resolveRollingWindowRange(query);
+  const histories = await getHistoriesByDateRange(userId, range.startDate, range.endDate);
 
   const totals = {
-    refreshed: 0,
-    strained: 0,
-    nearBurnout: 0,
+    relaxed: 0,
+    normal: 0,
+    exhausted: 0,
   };
 
-  let totalStressLevel = 0;
-
   histories.forEach((history) => {
-    const stressLevel = Number(history.stress_level || 0);
-    const category = classifyStressLevel(stressLevel);
-    totalStressLevel += stressLevel;
-
-    if (category === "refreshed") totals.refreshed += 1;
-    if (category === "strained") totals.strained += 1;
-    if (category === "near_burnout") totals.nearBurnout += 1;
+    const stressLevel = normalizeStressStatus(history.stress_status || deriveStressStatusFromLegacyScore(history.stress_level));
+    totals[stressLevel] += 1;
   });
-
-  const averageStressLevel = histories.length ? Number((totalStressLevel / histories.length).toFixed(2)) : 0;
+  const dominantStressLevel = histories.length
+    ? getDominantStressStatus(histories.map((history) => normalizeStressStatus(history.stress_status || deriveStressStatusFromLegacyScore(history.stress_level))))
+    : "normal";
 
   return {
-    startDate: histories[0]?.date || selectedDate,
-    endDate: selectedDate,
+    startDate: range.startDate,
+    endDate: range.endDate,
+    isDefaultRange: range.isDefaultRange,
     totalDays: histories.length,
-    averageStressLevel,
-    status: classifyStressLevel(averageStressLevel),
-    statusLabel: titleCaseStatus(classifyStressLevel(averageStressLevel)),
+    dominantStressLevel,
+    status: dominantStressLevel,
+    statusLabel: titleCaseStatus(dominantStressLevel),
     summary: [
-      { label: "Refreshed", value: `${totals.refreshed}` },
-      { label: "Strained", value: `${totals.strained}` },
-      { label: "Near-Burnout", value: `${totals.nearBurnout}` },
-      { label: "Avg Stress", value: `${toStressPercent(averageStressLevel)}%` },
+      { label: "Relaxed", value: `${totals.relaxed}` },
+      { label: "Normal", value: `${totals.normal}` },
+      { label: "Exhausted", value: `${totals.exhausted}` },
+      { label: "Stress Level", value: titleCaseStatus(dominantStressLevel) },
     ],
     totals,
     items: histories.map((history) => ({
-      date: history.date,
-      dateLabel: formatDateLabel(history.date),
-      stressLevel: Number(history.stress_level),
-      stressPercent: toStressPercent(history.stress_level),
-      status: classifyStressLevel(history.stress_level),
-      statusLabel: titleCaseStatus(classifyStressLevel(history.stress_level)),
+      date: normalizeDateValue(history.date),
+      stressLevel: normalizeStressStatus(history.stress_status || deriveStressStatusFromLegacyScore(history.stress_level)),
+      status: normalizeStressStatus(history.stress_status || deriveStressStatusFromLegacyScore(history.stress_level)),
+      statusLabel: titleCaseStatus(history.stress_status || deriveStressStatusFromLegacyScore(history.stress_level)),
     })),
   };
 };
@@ -106,11 +102,11 @@ const buildLocalRecommendation = (stressSummary, todayActivity) => {
     return "Belum ada aktivitas hari ini. Mulai dengan input activity harian terlebih dahulu agar rekomendasinya lebih akurat.";
   }
 
-  if (stressSummary.status === "near_burnout") {
+  if (stressSummary.status === "exhausted") {
     return "Prioritaskan istirahat malam yang cukup, kurangi screen time setelah jam kerja, pilih aktivitas fisik ringan 20-30 menit, dan batasi kafein di sore hari.";
   }
 
-  if (stressSummary.status === "strained") {
+  if (stressSummary.status === "normal") {
     return "Pertahankan ritme kerja dengan jeda singkat tiap 90 menit, tambah aktivitas fisik ringan, dan usahakan jam tidur lebih konsisten malam ini.";
   }
 
@@ -157,12 +153,13 @@ const getGeminiRecommendation = async (payload) => {
 
 const getActivityRecommendation = async (userId, query) => {
   const selectedDate = toIsoDate(query.date || new Date());
+  const range = resolveRollingWindowRange(query);
   const [dailyResult, stressSummary] = await Promise.all([
     getDashboardDailyActivity(userId, { date: selectedDate }),
-    getStressSummary(userId, { date: selectedDate }),
+    getStressSummary(userId, range),
   ]);
 
-  const histories = await getHistoriesForLastThirtyDays(userId, selectedDate);
+  const histories = await getHistoriesByDateRange(userId, range.startDate, range.endDate);
 
   if (!histories.length) {
     throw new ApiError(404, "No activity data found for recommendation");
@@ -171,7 +168,9 @@ const getActivityRecommendation = async (userId, query) => {
   const prompt = [
     "You are a wellness assistant.",
     `Today's date: ${selectedDate}.`,
-    `Average stress level in last 30 days: ${stressSummary.averageStressLevel}.`,
+    `History range start date: ${range.startDate}.`,
+    `History range end date: ${range.endDate}.`,
+    `Dominant stress level in selected history range: ${stressSummary.dominantStressLevel}.`,
     `Current status: ${stressSummary.status}.`,
     `Today activity: ${JSON.stringify(dailyResult.activity)}.`,
     `Monthly activities: ${JSON.stringify(histories)}.`,
@@ -189,19 +188,21 @@ const getActivityRecommendation = async (userId, query) => {
 };
 
 const getDashboardOverview = async (userId, query) => {
-  const selectedDate = toIsoDate(query.date || new Date());
+  const range = resolveRollingWindowRange(query);
+  const selectedDate = range.endDate;
   const [stressSummary, recommendationResult] = await Promise.all([
-    getStressSummary(userId, { date: selectedDate }),
-    getActivityRecommendation(userId, { date: selectedDate }),
+    getStressSummary(userId, range),
+    getActivityRecommendation(userId, { ...query, date: selectedDate, startDate: range.startDate, endDate: range.endDate }),
   ]);
 
-  const histories = await getHistoriesForLastThirtyDays(userId, selectedDate);
+  const histories = await getHistoriesByDateRange(userId, range.startDate, range.endDate);
 
   return {
+    range,
     summary: {
-      Refreshed: stressSummary.totals.refreshed,
-      Strained: stressSummary.totals.strained,
-      "Near-Burnout": stressSummary.totals.nearBurnout,
+      Relaxed: stressSummary.totals.relaxed,
+      Normal: stressSummary.totals.normal,
+      Exhausted: stressSummary.totals.exhausted,
     },
     histories: histories
       .map((history) =>
@@ -210,7 +211,7 @@ const getDashboardOverview = async (userId, query) => {
           date: history.date,
           screenTime: Number(history.screen_time),
           sleepHours: Number(history.sleep_hours),
-          stressLevel: Number(history.stress_level),
+          stressLevel: normalizeStressStatus(history.stress_status || deriveStressStatusFromLegacyScore(history.stress_level)),
           physicalActivity: history.physical_activity,
           caffeineIntake: Number(history.caffeine_intake),
           workHours: Number(history.work_hours),

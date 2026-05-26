@@ -1,5 +1,7 @@
 const { ApiError } = require("../../utils/api-error");
+const { buildGroupSlug } = require("../../utils/slug");
 const { findSocialBetweenUsers, findUserByEmail } = require("../social/social.repository");
+const { findUserById } = require("../user/user.repository");
 const {
   createGroupWithDefaults,
   createDefaultGroupForUser,
@@ -41,7 +43,9 @@ const mapGroupPermission = (permission) => ({
 const mapGroup = (group) => ({
   id: group.id,
   ownerId: group.id_user,
+  ownerUsername: group.owner_username,
   groupName: group.group_name,
+  slug: buildGroupSlug(group.owner_username, group.group_name),
   description: group.description,
   isDefault: Boolean(group.is_default),
   memberCount: Number(group.member_count || 0),
@@ -62,11 +66,14 @@ const createGroup = async (ownerId, payload) => {
     payload.groupName,
     payload.description ?? null
   );
+  const owner = await findUserById(ownerId);
 
   return {
     id: group.id,
     ownerId: group.id_user,
+    ownerUsername: owner.username,
     groupName: group.group_name,
+    slug: buildGroupSlug(owner.username, group.group_name),
     description: group.description,
     isDefault: Boolean(group.is_default),
     createdAt: group.created_at,

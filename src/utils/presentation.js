@@ -1,14 +1,6 @@
-const { classifyStressLevel } = require("./stress");
+const { titleCaseStressStatus } = require("./stress");
 
-const statusLabelMap = {
-  refreshed: "Refreshed",
-  strained: "Strained",
-  near_burnout: "Near-Burnout",
-};
-
-const titleCaseStatus = (value) => statusLabelMap[value] || "Unknown";
-
-const toStressPercent = (value) => Math.max(0, Math.min(100, Math.round(Number(value || 0) * 10)));
+const titleCaseStatus = (value) => titleCaseStressStatus(value);
 
 const formatHours = (value) => `${Number(value || 0).toFixed(1)}h`;
 
@@ -110,11 +102,10 @@ const formatRelativeTime = (value) => {
   return rtf.format(days, "day");
 };
 
-const describeStress = (stressLevel) => titleCaseStatus(classifyStressLevel(stressLevel));
+const describeStress = (stressLevel) => titleCaseStatus(stressLevel);
 
 module.exports = {
   titleCaseStatus,
-  toStressPercent,
   formatHours,
   formatCount,
   normalizeDateValue,
