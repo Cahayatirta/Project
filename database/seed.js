@@ -428,39 +428,206 @@ const socials = [
 
 const groups = [
   {
+    id: "c3c33333-3333-4333-8333-000000000001",
+    ownerId: users[0].id,
+    groupName: "Friends",
+    isDefault: true,
+    description: "Default group for accepted friends who are not assigned to a custom group.",
+  },
+  {
+    id: "c3c33333-3333-4333-8333-000000000002",
+    ownerId: users[1].id,
+    groupName: "Friends",
+    isDefault: true,
+    description: "Default group for accepted friends who are not assigned to a custom group.",
+  },
+  {
+    id: "c3c33333-3333-4333-8333-000000000003",
+    ownerId: users[2].id,
+    groupName: "Friends",
+    isDefault: true,
+    description: "Default group for accepted friends who are not assigned to a custom group.",
+  },
+  {
+    id: "c3c33333-3333-4333-8333-000000000004",
+    ownerId: users[3].id,
+    groupName: "Friends",
+    isDefault: true,
+    description: "Default group for accepted friends who are not assigned to a custom group.",
+  },
+  {
+    id: "c3c33333-3333-4333-8333-000000000005",
+    ownerId: users[4].id,
+    groupName: "Friends",
+    isDefault: true,
+    description: "Default group for accepted friends who are not assigned to a custom group.",
+  },
+  {
     id: "c3c33333-3333-4333-8333-111111111111",
     ownerId: users[0].id,
     groupName: "Inner Circle",
+    isDefault: false,
+    description: "Closest friends with full wellness sharing permissions.",
   },
 ];
 
 const groupMembers = [
   {
-    id: "d4d44444-4444-4444-8444-111111111111",
+    id: "d4d44444-4444-4444-8444-000000000001",
     groupId: groups[0].id,
     userId: users[0].id,
   },
   {
-    id: "d4d44444-4444-4444-8444-222222222222",
+    id: "d4d44444-4444-4444-8444-000000000002",
     groupId: groups[0].id,
     userId: users[1].id,
   },
   {
-    id: "d4d44444-4444-4444-8444-333333333333",
+    id: "d4d44444-4444-4444-8444-000000000003",
     groupId: groups[0].id,
     userId: users[2].id,
   },
   {
-    id: "d4d44444-4444-4444-8444-555555555555",
+    id: "d4d44444-4444-4444-8444-000000000004",
     groupId: groups[0].id,
+    userId: users[4].id,
+  },
+  {
+    id: "d4d44444-4444-4444-8444-000000000005",
+    groupId: groups[1].id,
+    userId: users[1].id,
+  },
+  {
+    id: "d4d44444-4444-4444-8444-000000000006",
+    groupId: groups[1].id,
+    userId: users[0].id,
+  },
+  {
+    id: "d4d44444-4444-4444-8444-000000000007",
+    groupId: groups[2].id,
+    userId: users[2].id,
+  },
+  {
+    id: "d4d44444-4444-4444-8444-000000000008",
+    groupId: groups[2].id,
+    userId: users[0].id,
+  },
+  {
+    id: "d4d44444-4444-4444-8444-000000000009",
+    groupId: groups[3].id,
+    userId: users[3].id,
+  },
+  {
+    id: "d4d44444-4444-4444-8444-000000000010",
+    groupId: groups[4].id,
+    userId: users[4].id,
+  },
+  {
+    id: "d4d44444-4444-4444-8444-000000000011",
+    groupId: groups[4].id,
+    userId: users[0].id,
+  },
+  {
+    id: "d4d44444-4444-4444-8444-111111111111",
+    groupId: groups[5].id,
+    userId: users[0].id,
+  },
+  {
+    id: "d4d44444-4444-4444-8444-222222222222",
+    groupId: groups[5].id,
+    userId: users[1].id,
+  },
+  {
+    id: "d4d44444-4444-4444-8444-333333333333",
+    groupId: groups[5].id,
+    userId: users[2].id,
+  },
+  {
+    id: "d4d44444-4444-4444-8444-555555555555",
+    groupId: groups[5].id,
     userId: users[4].id,
   },
 ];
 
 const groupPermissions = [
   {
-    id: "e5e55555-5555-4555-8555-111111111111",
+    id: "e5e55555-5555-4555-8555-000000000001",
     groupId: groups[0].id,
+    canViewScreenTime: false,
+    canViewSleepHours: false,
+    canViewWellnessIndex: false,
+    canViewSleepQuality: false,
+    canViewFatigueScore: false,
+    canViewDigitalBalance: false,
+    canViewScreenTimeCategory: false,
+    canViewPhysicalActivity: false,
+    canViewCaffeineIntake: false,
+    canViewWorkHours: false,
+    canViewMood: false,
+  },
+  {
+    id: "e5e55555-5555-4555-8555-000000000002",
+    groupId: groups[1].id,
+    canViewScreenTime: false,
+    canViewSleepHours: false,
+    canViewWellnessIndex: false,
+    canViewSleepQuality: false,
+    canViewFatigueScore: false,
+    canViewDigitalBalance: false,
+    canViewScreenTimeCategory: false,
+    canViewPhysicalActivity: false,
+    canViewCaffeineIntake: false,
+    canViewWorkHours: false,
+    canViewMood: false,
+  },
+  {
+    id: "e5e55555-5555-4555-8555-000000000003",
+    groupId: groups[2].id,
+    canViewScreenTime: false,
+    canViewSleepHours: false,
+    canViewWellnessIndex: false,
+    canViewSleepQuality: false,
+    canViewFatigueScore: false,
+    canViewDigitalBalance: false,
+    canViewScreenTimeCategory: false,
+    canViewPhysicalActivity: false,
+    canViewCaffeineIntake: false,
+    canViewWorkHours: false,
+    canViewMood: false,
+  },
+  {
+    id: "e5e55555-5555-4555-8555-000000000004",
+    groupId: groups[3].id,
+    canViewScreenTime: false,
+    canViewSleepHours: false,
+    canViewWellnessIndex: false,
+    canViewSleepQuality: false,
+    canViewFatigueScore: false,
+    canViewDigitalBalance: false,
+    canViewScreenTimeCategory: false,
+    canViewPhysicalActivity: false,
+    canViewCaffeineIntake: false,
+    canViewWorkHours: false,
+    canViewMood: false,
+  },
+  {
+    id: "e5e55555-5555-4555-8555-000000000005",
+    groupId: groups[4].id,
+    canViewScreenTime: false,
+    canViewSleepHours: false,
+    canViewWellnessIndex: false,
+    canViewSleepQuality: false,
+    canViewFatigueScore: false,
+    canViewDigitalBalance: false,
+    canViewScreenTimeCategory: false,
+    canViewPhysicalActivity: false,
+    canViewCaffeineIntake: false,
+    canViewWorkHours: false,
+    canViewMood: false,
+  },
+  {
+    id: "e5e55555-5555-4555-8555-111111111111",
+    groupId: groups[5].id,
     canViewScreenTime: true,
     canViewSleepHours: true,
     canViewWellnessIndex: true,
@@ -594,10 +761,10 @@ const insertGroups = async (client) => {
   for (const group of groups) {
     await client.query(
       `
-        INSERT INTO groups (id, id_user, group_name)
-        VALUES ($1, $2, $3)
+        INSERT INTO groups (id, id_user, group_name, is_default, description)
+        VALUES ($1, $2, $3, $4, $5)
       `,
-      [group.id, group.ownerId, group.groupName]
+      [group.id, group.ownerId, group.groupName, group.isDefault, group.description || null]
     );
   }
 };
