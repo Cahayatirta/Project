@@ -3,6 +3,7 @@ require("dotenv").config();
 const bcrypt = require("bcryptjs");
 
 const db = require("../src/config/database");
+const { deriveStressStatusFromLegacyScore } = require("../src/utils/stress");
 
 const users = [
   {
@@ -703,6 +704,7 @@ const insertHistories = async (client) => {
           date,
           screen_time,
           sleep_hours,
+          stress_status,
           stress_level,
           wellness_index,
           sleep_quality,
@@ -716,7 +718,7 @@ const insertHistories = async (client) => {
           created_at,
           updated_at
         )
-        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $16)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $17)
       `,
       [
         history.id,
@@ -724,6 +726,7 @@ const insertHistories = async (client) => {
         history.date,
         history.screenTime,
         history.sleepHours,
+        history.stressStatus || deriveStressStatusFromLegacyScore(history.stressLevel),
         history.stressLevel,
         history.wellnessIndex,
         history.sleepQuality,
