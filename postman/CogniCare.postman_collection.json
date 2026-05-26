@@ -1997,7 +1997,7 @@
                 ],
                 "body": {
                   "mode": "raw",
-                  "raw": "{}"
+                  "raw": "{\n  \"description\": \"This request should fail because groupName is missing.\"\n}"
                 },
                 "url": {
                   "raw": "{{baseUrl}}/api/groups",
