@@ -1,6 +1,7 @@
 const bcrypt = require("bcryptjs");
 
 const { ApiError } = require("../../utils/api-error");
+const { ensureDefaultFriendGroup } = require("../group/group.service");
 const { signAccessToken } = require("../../utils/jwt");
 const { createUser, findUserByEmail, findUserByUsername } = require("./auth.repository");
 
@@ -61,6 +62,8 @@ const register = async ({
     hobby,
     biodata,
   });
+
+  await ensureDefaultFriendGroup(user.id);
 
   const token = signAccessToken({
     sub: user.id,

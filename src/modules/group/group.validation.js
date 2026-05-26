@@ -7,11 +7,17 @@ const {
 } = require("../../utils/validation");
 
 const validateCreateGroup = (req, _res, next) => {
-  const { groupName } = req.body;
+  const { groupName, description } = req.body;
 
   if (isBlank(groupName)) {
     return next(new ApiError(400, "Validation failed", [
       buildRequiredError("groupName", "Group name"),
+    ]));
+  }
+
+  if (!isBlank(description) && typeof description !== "string") {
+    return next(new ApiError(400, "Validation failed", [
+      buildFieldError("description", "Group description must be a string"),
     ]));
   }
 

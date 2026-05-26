@@ -4,6 +4,7 @@ const { authenticate } = require("../../middlewares/auth.middleware");
 const { validateAddFriendToGroup, validateCreateGroup } = require("./group.validation");
 const {
   createGroupHandler,
+  listGroupsHandler,
   addFriendToGroupHandler,
   removeFriendFromGroupHandler,
   getGroupMembersHandler,
@@ -13,6 +14,7 @@ const {
 const router = express.Router();
 
 router.use(authenticate);
+router.get("/", listGroupsHandler);
 router.post("/", validateCreateGroup, createGroupHandler);
 router.post("/:groupId/members", validateAddFriendToGroup, addFriendToGroupHandler);
 router.delete("/:groupId/members/:userId", removeFriendFromGroupHandler);

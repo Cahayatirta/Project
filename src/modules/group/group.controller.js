@@ -1,6 +1,7 @@
 const { asyncHandler } = require("../../utils/async-handler");
 const {
   createGroup,
+  listGroups,
   addFriendToGroup,
   removeFriendFromGroup,
   getGroupMembers,
@@ -12,6 +13,15 @@ const createGroupHandler = asyncHandler(async (req, res) => {
 
   res.status(201).json({
     message: "Group created successfully",
+    data,
+  });
+});
+
+const listGroupsHandler = asyncHandler(async (req, res) => {
+  const data = await listGroups(req.user.sub);
+
+  res.status(200).json({
+    message: "Groups fetched successfully",
     data,
   });
 });
@@ -54,6 +64,7 @@ const editGroupPermissionsHandler = asyncHandler(async (req, res) => {
 
 module.exports = {
   createGroupHandler,
+  listGroupsHandler,
   addFriendToGroupHandler,
   removeFriendFromGroupHandler,
   getGroupMembersHandler,

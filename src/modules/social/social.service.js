@@ -1,6 +1,7 @@
 const { ApiError } = require("../../utils/api-error");
 const { resolveDateRange } = require("../../utils/period");
 const { getMonthlyHistoryDetail } = require("../activity/activity.service");
+const { syncAcceptedFriendToDefaultGroup } = require("../group/group.service");
 const {
   titleCaseStatus,
   toStressPercent,
@@ -141,6 +142,14 @@ const updateFriendRequest = async (userId, socialId, status) => {
   }
 
   await updateSocialStatus(socialId, status);
+
+  if (status === "accepted") {
+    await Promise.all([
+      syncAcceptedFriendToDefaultGroup(userId, relation.user_sender_id),
+      syncAcceptedFriendToDefaultGroup(relation.user_sender_id, userId),
+    ]);
+  }
+
   return { id: socialId, status };
 };
 

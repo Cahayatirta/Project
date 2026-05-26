@@ -2,11 +2,15 @@ const { ApiError } = require("../../utils/api-error");
 const { findSocialBetweenUsers, findUserByEmail } = require("../social/social.repository");
 const {
   createGroupWithDefaults,
+  createDefaultGroupForUser,
   findGroupById,
+  findDefaultGroupByOwnerId,
   findGroupMember,
   addGroupMember,
+  addGroupMemberIfNotExists,
   removeGroupMember,
   listGroupMembers,
+  listGroupsByOwnerId,
   updateGroupPermission,
 } = require("./group.repository");
 
@@ -20,6 +24,32 @@ const ensureGroupOwner = async (groupId, ownerId) => {
   return group;
 };
 
+const mapGroupPermission = (permission) => ({
+  canViewScreenTime: permission.can_view_screen_time,
+  canViewSleepHours: permission.can_view_sleep_hours,
+  canViewWellnessIndex: permission.can_view_wellness_index,
+  canViewSleepQuality: permission.can_view_sleep_quality,
+  canViewFatigueScore: permission.can_view_fatigue_score,
+  canViewDigitalBalance: permission.can_view_digital_balance,
+  canViewScreenTimeCategory: permission.can_view_screen_time_category,
+  canViewPhysicalActivity: permission.can_view_physical_activity,
+  canViewCaffeineIntake: permission.can_view_caffeine_intake,
+  canViewWorkHours: permission.can_view_work_hours,
+  canViewMood: permission.can_view_mood,
+});
+
+const mapGroup = (group) => ({
+  id: group.id,
+  ownerId: group.id_user,
+  groupName: group.group_name,
+  description: group.description,
+  isDefault: Boolean(group.is_default),
+  memberCount: Number(group.member_count || 0),
+  permissions: mapGroupPermission(group),
+  createdAt: group.created_at,
+  updatedAt: group.updated_at,
+});
+
 const createGroup = async (ownerId, payload) => {
   if (!payload.groupName) {
     throw new ApiError(400, "Validation failed", [
@@ -27,15 +57,37 @@ const createGroup = async (ownerId, payload) => {
     ]);
   }
 
-  const group = await createGroupWithDefaults(ownerId, payload.groupName);
+  const group = await createGroupWithDefaults(
+    ownerId,
+    payload.groupName,
+    payload.description ?? null
+  );
 
   return {
     id: group.id,
     ownerId: group.id_user,
     groupName: group.group_name,
+    description: group.description,
+    isDefault: Boolean(group.is_default),
     createdAt: group.created_at,
     updatedAt: group.updated_at,
   };
+};
+
+const ensureDefaultFriendGroup = async (ownerId) => {
+  const existing = await findDefaultGroupByOwnerId(ownerId);
+
+  if (existing) {
+    return existing;
+  }
+
+  return createDefaultGroupForUser(ownerId);
+};
+
+const syncAcceptedFriendToDefaultGroup = async (ownerId, friendId) => {
+  const defaultGroup = await ensureDefaultFriendGroup(ownerId);
+  await addGroupMemberIfNotExists(defaultGroup.id, friendId);
+  return defaultGroup;
 };
 
 const addFriendToGroup = async (ownerId, groupId, emailAddress) => {
@@ -50,7 +102,9 @@ const addFriendToGroup = async (ownerId, groupId, emailAddress) => {
   const relation = await findSocialBetweenUsers(ownerId, user.id);
 
   if (!relation || relation.status !== "accepted") {
-    throw new ApiError(400, "User is not your accepted friend");
+    throw new ApiError(400, "User is not your accepted friend", [
+      { property: "emailAddress", message: "Only accepted friends can be added to a group" },
+    ]);
   }
 
   const existing = await findGroupMember(groupId, user.id);
@@ -69,6 +123,12 @@ const addFriendToGroup = async (ownerId, groupId, emailAddress) => {
       emailAddress: user.email_address,
     },
   };
+};
+
+const listGroups = async (ownerId) => {
+  await ensureDefaultFriendGroup(ownerId);
+  const groups = await listGroupsByOwnerId(ownerId);
+  return groups.map(mapGroup);
 };
 
 const removeFriendFromGroup = async (ownerId, groupId, userId) => {
@@ -120,17 +180,7 @@ const editGroupPermissions = async (ownerId, groupId, payload) => {
   return {
     id: permission.id,
     groupId: permission.id_group,
-    canViewScreenTime: permission.can_view_screen_time,
-    canViewSleepHours: permission.can_view_sleep_hours,
-    canViewWellnessIndex: permission.can_view_wellness_index,
-    canViewSleepQuality: permission.can_view_sleep_quality,
-    canViewFatigueScore: permission.can_view_fatigue_score,
-    canViewDigitalBalance: permission.can_view_digital_balance,
-    canViewScreenTimeCategory: permission.can_view_screen_time_category,
-    canViewPhysicalActivity: permission.can_view_physical_activity,
-    canViewCaffeineIntake: permission.can_view_caffeine_intake,
-    canViewWorkHours: permission.can_view_work_hours,
-    canViewMood: permission.can_view_mood,
+    ...mapGroupPermission(permission),
     createdAt: permission.created_at,
     updatedAt: permission.updated_at,
   };
@@ -138,8 +188,11 @@ const editGroupPermissions = async (ownerId, groupId, payload) => {
 
 module.exports = {
   createGroup,
+  ensureDefaultFriendGroup,
+  syncAcceptedFriendToDefaultGroup,
   addFriendToGroup,
   removeFriendFromGroup,
+  listGroups,
   getGroupMembers,
   editGroupPermissions,
 };
