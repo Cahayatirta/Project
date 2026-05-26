@@ -522,7 +522,7 @@
                 ],
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"date\": \"{{primaryActivityDate}}\",\n  \"screenTime\": 7.5,\n  \"sleepHours\": 6,\n  \"stressLevel\": 7,\n  \"wellnessIndex\": 5,\n  \"sleepQuality\": 5,\n  \"fatigueScore\": 7,\n  \"digitalBalance\": 4,\n  \"screenTimeCategory\": \"high\",\n  \"physicalActivity\": \"walking\",\n  \"caffeineIntake\": 2,\n  \"workHours\": 9,\n  \"mood\": \"tired\"\n}"
+                  "raw": "{\n  \"date\": \"{{primaryActivityDate}}\",\n  \"screenTime\": 7.5,\n  \"sleepHours\": 6,\n  \"wellnessIndex\": 5,\n  \"sleepQuality\": 5,\n  \"fatigueScore\": 7,\n  \"digitalBalance\": 4,\n  \"screenTimeCategory\": \"high\",\n  \"physicalActivity\": \"walking\",\n  \"caffeineIntake\": 2,\n  \"workHours\": 9,\n  \"mood\": \"tired\"\n}"
                 },
                 "url": {
                   "raw": "{{baseUrl}}/api/activities",
@@ -568,7 +568,7 @@
                 ],
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"date\": \"{{friendActivityDate}}\",\n  \"screenTime\": 4,\n  \"sleepHours\": 8,\n  \"stressLevel\": 2,\n  \"wellnessIndex\": 8,\n  \"sleepQuality\": 8,\n  \"fatigueScore\": 3,\n  \"digitalBalance\": 8,\n  \"screenTimeCategory\": \"medium\",\n  \"physicalActivity\": \"yoga\",\n  \"caffeineIntake\": 1,\n  \"workHours\": 7,\n  \"mood\": \"good\"\n}"
+                  "raw": "{\n  \"date\": \"{{friendActivityDate}}\",\n  \"screenTime\": 4,\n  \"sleepHours\": 8,\n  \"wellnessIndex\": 8,\n  \"sleepQuality\": 8,\n  \"fatigueScore\": 3,\n  \"digitalBalance\": 8,\n  \"screenTimeCategory\": \"medium\",\n  \"physicalActivity\": \"yoga\",\n  \"caffeineIntake\": 1,\n  \"workHours\": 7,\n  \"mood\": \"good\"\n}"
                 },
                 "url": {
                   "raw": "{{baseUrl}}/api/activities",
@@ -658,7 +658,7 @@
                 ],
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"stressLevel\": 5,\n  \"mood\": \"better\"\n}"
+                  "raw": "{\n  \"mood\": \"better\"\n}"
                 },
                 "url": {
                   "raw": "{{baseUrl}}/api/activities/{{activityId}}",
@@ -1636,7 +1636,7 @@
                 ],
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"date\": \"{{primaryActivityDate}}\",\n  \"screenTime\": 6,\n  \"sleepHours\": 6,\n  \"stressLevel\": 6,\n  \"wellnessIndex\": 6,\n  \"sleepQuality\": 6,\n  \"fatigueScore\": 6,\n  \"digitalBalance\": 6,\n  \"screenTimeCategory\": \"high\",\n  \"physicalActivity\": \"walking\",\n  \"caffeineIntake\": 2,\n  \"workHours\": 8,\n  \"mood\": \"normal\"\n}"
+                  "raw": "{\n  \"date\": \"{{primaryActivityDate}}\",\n  \"screenTime\": 6,\n  \"sleepHours\": 6,\n  \"wellnessIndex\": 6,\n  \"sleepQuality\": 6,\n  \"fatigueScore\": 6,\n  \"digitalBalance\": 6,\n  \"screenTimeCategory\": \"high\",\n  \"physicalActivity\": \"walking\",\n  \"caffeineIntake\": 2,\n  \"workHours\": 8,\n  \"mood\": \"normal\"\n}"
                 },
                 "url": {
                   "raw": "{{baseUrl}}/api/activities",
@@ -2210,6 +2210,1620 @@
                     {
                       "key": "date",
                       "value": "2024-01-01"
+                    }
+                  ]
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Coverage Additions",
+      "item": [
+        {
+          "name": "Dashboard - Overview With Range",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code is 200', function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{primaryToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/dashboard?startDate={{dashboardStartDate}}&endDate={{dashboardEndDate}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "dashboard"
+              ],
+              "query": [
+                {
+                  "key": "startDate",
+                  "value": "{{dashboardStartDate}}"
+                },
+                {
+                  "key": "endDate",
+                  "value": "{{dashboardEndDate}}"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Dashboard - Stress Summary With Range",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code is 200', function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{primaryToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/dashboard/stress-summary?startDate={{dashboardStartDate}}&endDate={{dashboardEndDate}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "dashboard",
+                "stress-summary"
+              ],
+              "query": [
+                {
+                  "key": "startDate",
+                  "value": "{{dashboardStartDate}}"
+                },
+                {
+                  "key": "endDate",
+                  "value": "{{dashboardEndDate}}"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Activity - Monthly Histories",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code is 200', function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{primaryToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/activities/months",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "activities",
+                "months"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Activity - Monthly History Detail",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code is 200', function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{primaryToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/activities/months/detail?month=2026-05",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "activities",
+                "months",
+                "detail"
+              ],
+              "query": [
+                {
+                  "key": "month",
+                  "value": "2026-05"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Social - Friend Detail",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code is 200', function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{primaryToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/social/friends/{{friendAccountUserId}}?month=2026-05",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "social",
+                "friends",
+                "{{friendAccountUserId}}"
+              ],
+              "query": [
+                {
+                  "key": "month",
+                  "value": "2026-05"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Groups - List",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code is 200', function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{primaryToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/groups",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "groups"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Dashboard - Stress Summary Missing End Date",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code is 400', function () { pm.response.to.have.status(400); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{primaryToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/dashboard/stress-summary?startDate={{dashboardStartDate}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "dashboard",
+                "stress-summary"
+              ],
+              "query": [
+                {
+                  "key": "startDate",
+                  "value": "{{dashboardStartDate}}"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Activity - Reject Manual Stress Level",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code is 400', function () { pm.response.to.have.status(400); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{primaryToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"date\": \"{{friendActivityDate}}\",\n  \"screenTime\": 6.2,\n  \"sleepHours\": 6.7,\n  \"stressLevel\": \"exhausted\",\n  \"wellnessIndex\": 5.4,\n  \"sleepQuality\": 5.6,\n  \"fatigueScore\": 6.2,\n  \"digitalBalance\": 4.9,\n  \"screenTimeCategory\": \"high\",\n  \"physicalActivity\": \"20 min\",\n  \"caffeineIntake\": 2,\n  \"workHours\": 8.5,\n  \"mood\": \"tired\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/activities",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "activities"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Endpoint Coverage",
+      "item": [
+        {
+          "name": "Health - GET /",
+          "item": [
+            {
+              "name": "GET /",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status code is 200', function () { pm.response.to.have.status(200); });"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    ""
+                  ]
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "Auth",
+          "item": [
+            {
+              "name": "POST /api/auth/register",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status code is 201', function () { pm.response.to.have.status(201); });",
+                      "var jsonData = pm.response.json();",
+                      "pm.environment.set('coverageRegisterEmail', jsonData.data.user.emailAddress);"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"Coverage User\",\n  \"username\": \"coverageuser\",\n  \"emailAddress\": \"coverage.user@example.com\",\n  \"password\": \"password123\",\n  \"biodata\": \"Coverage user for complete endpoint testing.\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/api/auth/register",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "auth",
+                    "register"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "POST /api/auth/login",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status code is 200', function () { pm.response.to.have.status(200); });",
+                      "var jsonData = pm.response.json();",
+                      "pm.environment.set('coverageToken', jsonData.data.token);"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"emailAddress\": \"{{primaryEmail}}\",\n  \"password\": \"{{primaryPassword}}\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/api/auth/login",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "auth",
+                    "login"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "POST /api/auth/logout",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status code is 200', function () { pm.response.to.have.status(200); });"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{primaryToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/auth/logout",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "auth",
+                    "logout"
+                  ]
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "Users",
+          "item": [
+            {
+              "name": "GET /api/users/me",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status code is 200', function () { pm.response.to.have.status(200); });"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{primaryToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/users/me",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "users",
+                    "me"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "GET /api/users/:userId/profile",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status code is 200', function () { pm.response.to.have.status(200); });"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{primaryToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/users/{{friendAccountUserId}}/profile",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "users",
+                    "{{friendAccountUserId}}",
+                    "profile"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "PATCH /api/users/profile",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status code is 200', function () { pm.response.to.have.status(200); });"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{primaryToken}}"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"Cahaya Tirta Coverage\",\n  \"username\": \"cahayatirta_coverage\",\n  \"biodata\": \"Updated in endpoint coverage run.\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/api/users/profile",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "users",
+                    "profile"
+                  ]
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "Activities",
+          "item": [
+            {
+              "name": "POST /api/activities",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status code is 201', function () { pm.response.to.have.status(201); });",
+                      "var jsonData = pm.response.json();",
+                      "pm.environment.set('coverageActivityId', jsonData.data.id);"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{primaryToken}}"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"date\": \"2026-05-24\",\n  \"screenTime\": 6.3,\n  \"sleepHours\": 7,\n  \"wellnessIndex\": 6.4,\n  \"sleepQuality\": 6.8,\n  \"fatigueScore\": 4.8,\n  \"digitalBalance\": 5.9,\n  \"screenTimeCategory\": \"medium\",\n  \"physicalActivity\": \"30 min\",\n  \"caffeineIntake\": 1,\n  \"workHours\": 8,\n  \"mood\": \"calm\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/api/activities",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "activities"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "GET /api/activities",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status code is 200', function () { pm.response.to.have.status(200); });"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{primaryToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/activities?period=daily&date={{primaryActivityDate}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "activities"
+                  ],
+                  "query": [
+                    {
+                      "key": "period",
+                      "value": "daily"
+                    },
+                    {
+                      "key": "date",
+                      "value": "{{primaryActivityDate}}"
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "GET /api/activities/months",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status code is 200', function () { pm.response.to.have.status(200); });"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{primaryToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/activities/months",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "activities",
+                    "months"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "GET /api/activities/months/detail",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status code is 200', function () { pm.response.to.have.status(200); });"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{primaryToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/activities/months/detail?month=2026-05",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "activities",
+                    "months",
+                    "detail"
+                  ],
+                  "query": [
+                    {
+                      "key": "month",
+                      "value": "2026-05"
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "GET /api/activities/averages/factors",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status code is 200', function () { pm.response.to.have.status(200); });"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{primaryToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/activities/averages/factors?period=monthly&month=2026-05",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "activities",
+                    "averages",
+                    "factors"
+                  ],
+                  "query": [
+                    {
+                      "key": "period",
+                      "value": "monthly"
+                    },
+                    {
+                      "key": "month",
+                      "value": "2026-05"
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "PATCH /api/activities/:activityId",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status code is 200', function () { pm.response.to.have.status(200); });"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{primaryToken}}"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"mood\": \"focused\",\n  \"physicalActivity\": \"45 min\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/api/activities/{{activityId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "activities",
+                    "{{activityId}}"
+                  ]
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "Social",
+          "item": [
+            {
+              "name": "POST /api/social/friends",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status code is 200', function () { pm.response.to.have.status(200); });"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{primaryToken}}"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"emailAddress\": \"{{friendEmail}}\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/api/social/friends",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "social",
+                    "friends"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "GET /api/social/friends/requests",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status code is 200', function () { pm.response.to.have.status(200); });"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{friendToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/social/friends/requests",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "social",
+                    "friends",
+                    "requests"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "POST /api/social/friends/:socialId/accept",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status code is 200', function () { pm.response.to.have.status(200); });"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{friendToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/social/friends/{{socialId}}/accept",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "social",
+                    "friends",
+                    "{{socialId}}",
+                    "accept"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "POST /api/social/friends/:socialId/reject",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status code is 404', function () { pm.response.to.have.status(404); });"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{friendToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/social/friends/{{invalidSocialId}}/reject",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "social",
+                    "friends",
+                    "{{invalidSocialId}}",
+                    "reject"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "POST /api/social/friends/block",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status code is 404', function () { pm.response.to.have.status(404); });"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{primaryToken}}"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"emailAddress\": \"{{unknownEmail}}\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/api/social/friends/block",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "social",
+                    "friends",
+                    "block"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "GET /api/social/friends",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status code is 200', function () { pm.response.to.have.status(200); });"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{primaryToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/social/friends",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "social",
+                    "friends"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "GET /api/social/friends/stats",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status code is 200', function () { pm.response.to.have.status(200); });"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{primaryToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/social/friends/stats",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "social",
+                    "friends",
+                    "stats"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "GET /api/social/friends/averages",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status code is 200', function () { pm.response.to.have.status(200); });"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{primaryToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/social/friends/averages?groupId={{groupId}}&period=monthly&month=2026-05",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "social",
+                    "friends",
+                    "averages"
+                  ],
+                  "query": [
+                    {
+                      "key": "groupId",
+                      "value": "{{groupId}}"
+                    },
+                    {
+                      "key": "period",
+                      "value": "monthly"
+                    },
+                    {
+                      "key": "month",
+                      "value": "2026-05"
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "GET /api/social/friends/:friendId",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status code is 200', function () { pm.response.to.have.status(200); });"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{primaryToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/social/friends/{{friendAccountUserId}}?month=2026-05",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "social",
+                    "friends",
+                    "{{friendAccountUserId}}"
+                  ],
+                  "query": [
+                    {
+                      "key": "month",
+                      "value": "2026-05"
+                    }
+                  ]
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "Groups",
+          "item": [
+            {
+              "name": "GET /api/groups",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status code is 200', function () { pm.response.to.have.status(200); });"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{primaryToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/groups",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "groups"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "POST /api/groups",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status code is 201', function () { pm.response.to.have.status(201); });",
+                      "var jsonData = pm.response.json();",
+                      "pm.environment.set('coverageGroupId', jsonData.data.id);"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{primaryToken}}"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"groupName\": \"Coverage Group\",\n  \"description\": \"Created for explicit endpoint coverage.\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/api/groups",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "groups"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "POST /api/groups/:groupId/members",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status code is 200', function () { pm.response.to.have.status(200); });"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{primaryToken}}"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"emailAddress\": \"{{friendEmail}}\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/api/groups/{{coverageGroupId}}/members",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "groups",
+                    "{{coverageGroupId}}",
+                    "members"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "DELETE /api/groups/:groupId/members/:userId",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status code is 200', function () { pm.response.to.have.status(200); });"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "DELETE",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{primaryToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/groups/{{coverageGroupId}}/members/{{friendAccountUserId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "groups",
+                    "{{coverageGroupId}}",
+                    "members",
+                    "{{friendAccountUserId}}"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "GET /api/groups/:groupId/members",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status code is 200', function () { pm.response.to.have.status(200); });"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{primaryToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/groups/{{groupId}}/members",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "groups",
+                    "{{groupId}}",
+                    "members"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "PATCH /api/groups/:groupId/permissions",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status code is 200', function () { pm.response.to.have.status(200); });"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{primaryToken}}"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"canViewMood\": true,\n  \"canViewSleepHours\": true\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/api/groups/{{groupId}}/permissions",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "groups",
+                    "{{groupId}}",
+                    "permissions"
+                  ]
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "Dashboard",
+          "item": [
+            {
+              "name": "GET /api/dashboard",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status code is 200', function () { pm.response.to.have.status(200); });"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{primaryToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/dashboard?startDate={{dashboardStartDate}}&endDate={{dashboardEndDate}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "dashboard"
+                  ],
+                  "query": [
+                    {
+                      "key": "startDate",
+                      "value": "{{dashboardStartDate}}"
+                    },
+                    {
+                      "key": "endDate",
+                      "value": "{{dashboardEndDate}}"
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "GET /api/dashboard/activity/daily",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status code is 200', function () { pm.response.to.have.status(200); });"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{primaryToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/dashboard/activity/daily?date={{primaryActivityDate}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "dashboard",
+                    "activity",
+                    "daily"
+                  ],
+                  "query": [
+                    {
+                      "key": "date",
+                      "value": "{{primaryActivityDate}}"
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "GET /api/dashboard/stress-summary",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status code is 200', function () { pm.response.to.have.status(200); });"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{primaryToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/dashboard/stress-summary?startDate={{dashboardStartDate}}&endDate={{dashboardEndDate}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "dashboard",
+                    "stress-summary"
+                  ],
+                  "query": [
+                    {
+                      "key": "startDate",
+                      "value": "{{dashboardStartDate}}"
+                    },
+                    {
+                      "key": "endDate",
+                      "value": "{{dashboardEndDate}}"
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "GET /api/dashboard/recommendation",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status code is 200', function () { pm.response.to.have.status(200); });"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{primaryToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/dashboard/recommendation?date={{primaryActivityDate}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "dashboard",
+                    "recommendation"
+                  ],
+                  "query": [
+                    {
+                      "key": "date",
+                      "value": "{{primaryActivityDate}}"
                     }
                   ]
                 }
