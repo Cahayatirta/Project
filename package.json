@@ -10,6 +10,8 @@
     "dev": "nodemon server.js",
     "start": "node server.js",
     "check": "node --check server.js && node --check src/app.js",
+    "db:reset": "node database/reset.js",
+    "db:refresh": "node database/refresh.js",
     "db:migrate": "node database/migrate.js",
     "db:seed": "node database/seed.js"
   },

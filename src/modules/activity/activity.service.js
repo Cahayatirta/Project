@@ -23,6 +23,7 @@ const {
   getHistoryMonthsByUser,
   getLatestHistoryDateByUser,
 } = require("./activity.repository");
+const { predictStressFromActivity } = require("./activity-ai.service");
 
 const mapHistory = (row) => ({
   id: row.id,
@@ -134,25 +135,29 @@ const buildMonthCard = (monthPath, histories) => {
   };
 };
 
-const normalizeActivityPayload = (payload) => ({
-  date: payload.date ? toIsoDate(payload.date) : undefined,
-  screenTime: payload.screenTime ?? 0,
-  sleepHours: payload.sleepHours ?? 0,
-  wellnessIndex: payload.wellnessIndex ?? 0,
-  sleepQuality: payload.sleepQuality ?? 0,
-  fatigueScore: payload.fatigueScore ?? 0,
-  digitalBalance: payload.digitalBalance ?? 0,
-  screenTimeCategory: payload.screenTimeCategory ?? null,
-  physicalActivity: payload.physicalActivity ?? null,
-  caffeineIntake: payload.caffeineIntake ?? 0,
-  workHours: payload.workHours ?? 0,
-  mood: payload.mood ?? null,
-  stressStatus: generateStressStatusFromSignals(payload),
-  stressLevel: 0,
-});
+const normalizeActivityPayload = async (payload) => {
+  const prediction = predictStressFromActivity(payload);
+
+  return {
+    date: payload.date ? toIsoDate(payload.date) : undefined,
+    screenTime: payload.screenTime ?? 0,
+    sleepHours: payload.sleepHours ?? 0,
+    wellnessIndex: payload.wellnessIndex ?? 0,
+    sleepQuality: payload.sleepQuality ?? 0,
+    fatigueScore: payload.fatigueScore ?? 0,
+    digitalBalance: payload.digitalBalance ?? 0,
+    screenTimeCategory: payload.screenTimeCategory ?? null,
+    physicalActivity: payload.physicalActivity ?? null,
+    caffeineIntake: payload.caffeineIntake ?? 0,
+    workHours: payload.workHours ?? 0,
+    mood: payload.mood ?? null,
+    stressStatus: normalizeStressStatus(prediction.status || generateStressStatusFromSignals(payload)),
+    stressLevel: prediction.stressLevelScore ?? 0,
+  };
+};
 
 const addActivity = async (userId, payload) => {
-  const normalized = normalizeActivityPayload(payload);
+  const normalized = await normalizeActivityPayload(payload);
 
   if (!normalized.date) {
     throw new ApiError(400, "Validation failed", [
@@ -181,18 +186,29 @@ const updateActivity = async (userId, historyId, payload) => {
     throw new ApiError(404, "Activity not found");
   }
 
+  const mergedPayload = {
+    date: payload.date ? toIsoDate(payload.date) : history.date,
+    screenTime: payload.screenTime ?? Number(history.screen_time),
+    sleepHours: payload.sleepHours ?? Number(history.sleep_hours),
+    wellnessIndex: payload.wellnessIndex ?? Number(history.wellness_index),
+    sleepQuality: payload.sleepQuality ?? Number(history.sleep_quality),
+    fatigueScore: payload.fatigueScore ?? Number(history.fatigue_score),
+    digitalBalance: payload.digitalBalance ?? Number(history.digital_balance),
+    screenTimeCategory: payload.screenTimeCategory ?? history.screen_time_category,
+    physicalActivity: payload.physicalActivity ?? history.physical_activity,
+    caffeineIntake: payload.caffeineIntake ?? Number(history.caffeine_intake),
+    workHours: payload.workHours ?? Number(history.work_hours),
+    mood: payload.mood ?? history.mood,
+  };
+
+  const prediction = predictStressFromActivity(mergedPayload);
+
   const updated = await updateHistoryById(historyId, {
     date: payload.date ? toIsoDate(payload.date) : undefined,
     screen_time: payload.screenTime,
     sleep_hours: payload.sleepHours,
-    stress_status: generateStressStatusFromSignals({
-      screenTime: payload.screenTime ?? history.screen_time,
-      sleepHours: payload.sleepHours ?? history.sleep_hours,
-      caffeineIntake: payload.caffeineIntake ?? history.caffeine_intake,
-      workHours: payload.workHours ?? history.work_hours,
-      physicalActivity: payload.physicalActivity ?? history.physical_activity,
-      mood: payload.mood ?? history.mood,
-    }),
+    stress_status: normalizeStressStatus(prediction.status || generateStressStatusFromSignals(mergedPayload)),
+    stress_level: prediction.stressLevelScore ?? history.stress_level,
     wellness_index: payload.wellnessIndex,
     sleep_quality: payload.sleepQuality,
     fatigue_score: payload.fatigueScore,

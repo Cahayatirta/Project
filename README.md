@@ -26,6 +26,30 @@ database/init.sql
 npm run dev
 ```
 
+## Integrasi model AI activity
+
+Endpoint `POST /api/activities` dan `PATCH /api/activities/:activityId` sekarang memakai model AI dari folder `Model Ai/model` untuk menghasilkan `stressStatus` secara otomatis.
+
+Jika command Python lokal Anda bukan `python`, atur di `.env`:
+
+```bash
+AI_PYTHON_COMMAND=python
+```
+
+## Utility database
+
+Reset schema database:
+
+```bash
+npm run db:reset
+```
+
+Reset lalu migrate dan seed ulang:
+
+```bash
+npm run db:refresh
+```
+
 ## Struktur folder utama
 
 - `src/config`: environment dan database

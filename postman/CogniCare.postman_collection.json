@@ -1113,8 +1113,9 @@
                       "var jsonData = pm.response.json();",
                       "pm.test('Friend stats has totals', function () {",
                       "  pm.expect(jsonData.data.totalFriend).to.not.equal(undefined);",
-                      "  pm.expect(jsonData.data.totalRefreshedFriend).to.not.equal(undefined);",
-                      "  pm.expect(jsonData.data.totalNearBurnoutFriend).to.not.equal(undefined);",
+                      "  pm.expect(jsonData.data.totalRelaxedFriend).to.not.equal(undefined);",
+                      "  pm.expect(jsonData.data.totalNormalFriend).to.not.equal(undefined);",
+                      "  pm.expect(jsonData.data.totalExhaustedFriend).to.not.equal(undefined);",
                       "});"
                     ]
                   }
@@ -3061,6 +3062,145 @@
                   ]
                 }
               }
+            },
+            {
+              "name": "AI Model Test",
+              "item": [
+                {
+                  "name": "POST /api/activities (AI - Exhausted Sample)",
+                  "event": [
+                    {
+                      "listen": "test",
+                      "script": {
+                        "type": "text/javascript",
+                        "exec": [
+                          "pm.test('Status code is 201', function () { pm.response.to.have.status(201); });",
+                          "var jsonData = pm.response.json();",
+                          "pm.test('AI generated stress status exists', function () { pm.expect(jsonData.data.stressLevel).to.be.oneOf(['relaxed', 'normal', 'exhausted']); });",
+                          "pm.environment.set('aiActivityId', jsonData.data.id);"
+                        ]
+                      }
+                    }
+                  ],
+                  "request": {
+                    "method": "POST",
+                    "header": [
+                      {
+                        "key": "Authorization",
+                        "value": "Bearer {{primaryToken}}"
+                      },
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                      }
+                    ],
+                    "body": {
+                      "mode": "raw",
+                      "raw": "{\n  \"date\": \"{{aiActivityInputDate}}\",\n  \"screenTime\": 9.5,\n  \"sleepHours\": 5.2,\n  \"wellnessIndex\": 4.2,\n  \"sleepQuality\": 3.8,\n  \"fatigueScore\": 8.3,\n  \"digitalBalance\": 3.5,\n  \"screenTimeCategory\": \"high\",\n  \"physicalActivity\": \"0 min\",\n  \"caffeineIntake\": 4,\n  \"workHours\": 10,\n  \"mood\": \"anxious\"\n}"
+                    },
+                    "url": {
+                      "raw": "{{baseUrl}}/api/activities",
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "path": [
+                        "api",
+                        "activities"
+                      ]
+                    }
+                  }
+                },
+                {
+                  "name": "GET /api/activities (AI Sample by Date)",
+                  "event": [
+                    {
+                      "listen": "test",
+                      "script": {
+                        "type": "text/javascript",
+                        "exec": [
+                          "pm.test('Status code is 200', function () { pm.response.to.have.status(200); });",
+                          "var jsonData = pm.response.json();",
+                          "pm.test('History array exists', function () { pm.expect(jsonData.data.history).to.be.an('array').and.not.empty; });",
+                          "pm.test('AI status visible in history', function () { pm.expect(jsonData.data.history[0].stressLevel).to.be.oneOf(['relaxed', 'normal', 'exhausted']); });"
+                        ]
+                      }
+                    }
+                  ],
+                  "request": {
+                    "method": "GET",
+                    "header": [
+                      {
+                        "key": "Authorization",
+                        "value": "Bearer {{primaryToken}}"
+                      }
+                    ],
+                    "url": {
+                      "raw": "{{baseUrl}}/api/activities?period=daily&date={{aiActivityInputDate}}",
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "path": [
+                        "api",
+                        "activities"
+                      ],
+                      "query": [
+                        {
+                          "key": "period",
+                          "value": "daily"
+                        },
+                        {
+                          "key": "date",
+                          "value": "{{aiActivityInputDate}}"
+                        }
+                      ]
+                    }
+                  }
+                },
+                {
+                  "name": "PATCH /api/activities/:activityId (AI - Relaxed Update)",
+                  "event": [
+                    {
+                      "listen": "test",
+                      "script": {
+                        "type": "text/javascript",
+                        "exec": [
+                          "pm.test('Status code is 200', function () { pm.response.to.have.status(200); });",
+                          "var jsonData = pm.response.json();",
+                          "pm.test('AI updated stress status exists', function () { pm.expect(jsonData.data.stressLevel).to.be.oneOf(['relaxed', 'normal', 'exhausted']); });"
+                        ]
+                      }
+                    }
+                  ],
+                  "request": {
+                    "method": "PATCH",
+                    "header": [
+                      {
+                        "key": "Authorization",
+                        "value": "Bearer {{primaryToken}}"
+                      },
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                      }
+                    ],
+                    "body": {
+                      "mode": "raw",
+                      "raw": "{\n  \"screenTime\": 4.8,\n  \"sleepHours\": 8.1,\n  \"wellnessIndex\": 8.1,\n  \"sleepQuality\": 8.2,\n  \"fatigueScore\": 2.9,\n  \"digitalBalance\": 7.8,\n  \"screenTimeCategory\": \"low\",\n  \"physicalActivity\": \"45 min\",\n  \"caffeineIntake\": 1,\n  \"workHours\": 7,\n  \"mood\": \"relaxed\"\n}"
+                    },
+                    "url": {
+                      "raw": "{{baseUrl}}/api/activities/{{aiActivityId}}",
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "path": [
+                        "api",
+                        "activities",
+                        "{{aiActivityId}}"
+                      ]
+                    }
+                  }
+                }
+              ]
             }
           ]
         },
