@@ -1,4 +1,4 @@
-const { ApiError } = require("../../utils/api-error");
+ const { ApiError } = require("../../utils/api-error");
 const {
   buildFieldError,
   buildRequiredError,
@@ -29,7 +29,7 @@ const validateFriendAveragesQuery = (req, _res, next) => {
   if (isBlank(groupId)) {
     return next(new ApiError(400, "Validation failed", [
       buildRequiredError("groupId", "Group ID"),
-    ]));
+    ]));  
   }
 
   return next();
