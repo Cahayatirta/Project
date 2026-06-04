@@ -8,6 +8,7 @@
   "main": "server.js",
   "scripts": {
     "dev": "nodemon server.js",
+    "dev:all": "node scripts/dev-all.js",
     "start": "node server.js",
     "check": "node --check server.js && node --check src/app.js",
     "db:reset": "node database/reset.js",

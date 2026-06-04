@@ -161,8 +161,14 @@ const getActivityRecommendation = async (userId, query) => {
 
   const histories = await getHistoriesByDateRange(userId, range.startDate, range.endDate);
 
+  // Return default recommendation for new users without activity history
   if (!histories.length) {
-    throw new ApiError(404, "No activity data found for recommendation");
+    return {
+      date: selectedDate,
+      source: "local_fallback",
+      stressSummary,
+      recommendation: "Mulai hari dengan baik! Catat aktivitas harian Anda untuk mendapatkan rekomendasi personal yang lebih akurat.",
+    };
   }
 
   const prompt = [

@@ -22,9 +22,19 @@ database/init.sql
 
 ## 4. Jalankan server
 
+Jalankan backend saja:
+
 ```bash
 npm run dev
 ```
+
+Atau jalankan backend dan frontend secara bersamaan:
+
+```bash
+npm run dev:all
+```
+
+Frontend akan berjalan di `http://localhost:5173` (atau port berikutnya jika ada yang terpakai) dan backend di `http://localhost:5001`.
 
 ## Integrasi model AI activity
 
