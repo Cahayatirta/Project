@@ -11,6 +11,8 @@ import ChangePermission from "../components/social/ChangePermission";
 
 export default function Social() {
   const { data: socials } = useLoaderData() as LoaderData<Socials>;
+  console.log(socials);
+  
   const [openNewFriend, setOpenNewFriend] = useState(false);
   const [openPermission, setOpenPermission] = useState(false);
 

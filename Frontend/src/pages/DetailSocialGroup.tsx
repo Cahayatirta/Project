@@ -8,7 +8,7 @@ import type { SocialGroupDetail } from "../controller/socialGroupController";
 
 export default function DetailSocialGroup() {
   const { data } = useLoaderData() as LoaderData<SocialGroupDetail>;
-  // console.log(data);
+  console.log(data);
   const { group, summary, friends } = data;
 
   return (
