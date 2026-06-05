@@ -8,6 +8,7 @@ import type { SocialGroupDetail } from "../controller/socialGroupController";
 
 export default function DetailSocialGroup() {
   const { data } = useLoaderData() as LoaderData<SocialGroupDetail>;
+  // console.log(data);
   const { group, summary, friends } = data;
 
   return (
@@ -52,12 +53,12 @@ export default function DetailSocialGroup() {
           </div>
           <div className="rounded-lg bg-primary-700 p-4 text-white">
             <p className="text-sm text-primary-100">Group slug</p>
-            <p className="mt-1 font-semibold">/{group.slug}</p>
+            <p className="mt-1 font-semibold">{group.slug}</p>
           </div>
         </div>
       </section>
 
-      <div className="mt-8 grid grid-cols-6 gap-6">
+      <div className="mt-8 grid grid-cols-8 gap-6">
         {summary.map((stat) => (
           <SocialSummaryCard key={stat.label} stat={stat} />
         ))}

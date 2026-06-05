@@ -1,4 +1,4 @@
-import { useEffect, useState, type FormEvent } from "react";
+import { useState, type FormEvent } from "react";
 import { useRouteLoaderData } from "react-router";
 import api from "../utils/api";
 import { getToken, setAuthSession } from "../utils/auth";
@@ -10,7 +10,7 @@ import useFormInput from "../hooks/useFormInput";
 export default function Profile() {
   const rootData = useRouteLoaderData("root") as { user?: User } | undefined;
   const user = rootData?.user;
-  const [form, handleInput, setField] = useFormInput({
+  const [form, handleInput] = useFormInput({
     name: user?.name ?? "",
     username: user?.username ?? "",
     birthDate: user?.birthDate ?? "",
@@ -24,20 +24,20 @@ export default function Profile() {
   const [message, setMessage] = useState<string>();
   const [error, setError] = useState<string>();
 
-  useEffect(() => {
-    if (!user) {
-      return;
-    }
+  // useEffect(() => {
+  //   if (!user) {
+  //     return;
+  //   }
 
-    setField("name", user.name ?? "");
-    setField("username", user.username ?? "");
-    setField("birthDate", user.birthDate ?? "");
-    setField("gender", user.gender ?? "");
-    setField("job", user.job ?? "");
-    setField("workLocation", user.workLocation ?? "");
-    setField("hobby", user.hobby ?? "");
-    setField("biodata", user.biodata ?? user.bio ?? "");
-  }, [setField, user]);
+  //   setField("name", user.name ?? "");
+  //   setField("username", user.username ?? "");
+  //   setField("birthDate", user.birthDate ?? "");
+  //   setField("gender", user.gender ?? "");
+  //   setField("job", user.job ?? "");
+  //   setField("workLocation", user.workLocation ?? "");
+  //   setField("hobby", user.hobby ?? "");
+  //   setField("biodata", user.biodata ?? user.bio ?? "");
+  // }, [setField, user]);
 
   async function handleProfileSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -68,7 +68,7 @@ export default function Profile() {
     <main className="container mx-auto max-w-4xl px-4 py-8">
       <div className="mb-8">
         <h1 className="text-3xl font-semibold text-slate-900">Profile</h1>
-        <p className="mt-1 text-slate-600">Update your account information and password.</p>
+        <p className="mt-1 text-slate-600">Update your account information.</p>
       </div>
 
       <div className="flex flex-col gap-6">
@@ -139,7 +139,7 @@ export default function Profile() {
           </form>
         </section>
 
-        <section className="rounded-xl bg-white p-6 shadow-md">
+        {/* <section className="rounded-xl bg-white p-6 shadow-md">
           <div className="mb-5">
             <h2 className="text-xl font-semibold text-slate-900">Update Password</h2>
             <p className="mt-1 text-sm text-slate-500">Enter your current password before setting a new one.</p>
@@ -171,7 +171,7 @@ export default function Profile() {
               <Button type="button" disabled>Update Password</Button>
             </div>
           </form>
-        </section>
+        </section> */}
       </div>
     </main>
   );

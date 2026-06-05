@@ -65,6 +65,7 @@ export interface User {
 
 export interface Friend extends User {
   status: Stress;
+  stressStatus: Stress;
   time: string;
   stressLevel: number;
   lastActivityDate?: string | null;

@@ -108,10 +108,10 @@ const router = createBrowserRouter([
         Component: SocialDetail,
         loader: socialProfileLoader
       },
-      {
-        path: "*",
-        Component: NotFound,
-      },
+      // {
+      //   path: "*",
+      //   Component: NotFound,
+      // },
     ],
   },
   {

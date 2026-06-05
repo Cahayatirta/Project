@@ -45,7 +45,7 @@ export default function Social() {
             </Link>
           </div>
         </div>
-        <div className="mt-8 grid grid-cols-6 gap-6">
+        <div className="mt-8 grid grid-cols-8 gap-6">
           { socials.summary.map((stat, i) => <SocialSummaryCard key={i} stat={stat} />) }
         </div>
         <div className="list-friends mt-8 flex flex-col gap-4">

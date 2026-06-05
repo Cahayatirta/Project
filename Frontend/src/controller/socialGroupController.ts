@@ -55,8 +55,10 @@ export async function allGroups() {
 }
 
 export async function groupDetail({ params }: LoaderFunctionArgs) {
+
   const { data: groupsResponse } = await api.get<ApiResponse<GroupApiItem[]>>("/groups");
-  const group = groupsResponse.data.find((item) => item.slug === params.slug);
+  console.log(groupsResponse);
+  const group = groupsResponse.data.find((item) => item.slug === `/${params.slug}`);
 
   if (!group) {
     throw new Response("Not Found", { status: 404 });

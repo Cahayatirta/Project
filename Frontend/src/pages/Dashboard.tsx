@@ -3,9 +3,10 @@ import Calendar, { type CalendarEvent } from "../components/Calendar";
 import PieChart from "../components/PieChart";
 import AddActivity from "../components/AddActivity";
 import { useLoaderData } from "react-router";
-import type { DashboardData, LoaderData } from "../utils/types";
+import type { ApiResponse, DashboardData, LoaderData } from "../utils/types";
 import { createDateFromRawDate, formatDate } from "../utils/util";
 import DetailActivity from "../components/dashboard/DetailActivity";
+import api from "../utils/api";
 
 const oneDayInMilliseconds = 24 * 60 * 60 * 1000;
 
@@ -44,7 +45,7 @@ export default function Dashboard() {
   const [activeDate, setActiveDate] = useState<Date>()
 
   const { data } = useLoaderData() as LoaderData<DashboardData>
-  const { histories } = data
+  const [histories, setHistories] = useState(data.histories)
   const historyCalendarEvents = useMemo(() => createHistoryCalendarEvents(histories), [histories]);
   const activeRecord = useMemo(() => {
     if (activeDate) {
@@ -52,6 +53,25 @@ export default function Dashboard() {
     }
     return undefined;
   }, [activeDate, histories]);
+
+  const monthChangedHandler = async (newMonth: Date) => {
+    const startDate = new Date(newMonth.getFullYear(), newMonth.getMonth(), 1);
+    const endDate = new Date(newMonth.getFullYear(), newMonth.getMonth() + 1, 0);
+    const { data: response } = await api.get<ApiResponse<DashboardData>>("/dashboard", {
+      params: {
+        startDate: formatDate(startDate),
+        endDate: formatDate(endDate),
+      },
+    });
+
+    setHistories((currentHistories) => {
+      const historiesByDate = new Map(
+        [...currentHistories, ...response.data.histories].map((history) => [history.dateRaw, history])
+      );
+
+      return Array.from(historiesByDate.values());
+    });
+  }
   
   return (
     <>
@@ -64,14 +84,14 @@ export default function Dashboard() {
           </div>
           <div className="rounded-md bg-white shadow-md p-8" />
         </section>
-        <section>
+        <section className="mt-6">
             <Calendar
             addActivity={(date) => {
               setOpenNewActivity(true)
               setActiveDate(date)
             }}
             events={historyCalendarEvents}
-            monthUpdated={(newMonth) => console.log(newMonth)}
+            monthUpdated={monthChangedHandler}
             viewDay={(date) => {
               setOpenDetail(true)
               setActiveDate(date)

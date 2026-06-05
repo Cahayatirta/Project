@@ -8,6 +8,8 @@ import StressTrend from "../StressTrend";
 
 export default function FriendCard({ friend }: { friend: Friend }) {
   const profileUrl = `/@${friend.username}`;
+  console.log(friend);
+  
 
   return (
     <div className="flex items-center gap-4 rounded-xl bg-white px-5 py-4 shadow-md">
@@ -24,7 +26,7 @@ export default function FriendCard({ friend }: { friend: Friend }) {
               {friend.name}
             </Link>
             <div className="flex items-center gap-2 text-sm text-slate-500">
-              <StressBadge label={friend.status} />
+              <StressBadge label={friend.stressStatus} />
               <span className="text-[10px] sm:text-base">&bull; {friend.time}</span>
             </div>
           </div>
@@ -33,10 +35,10 @@ export default function FriendCard({ friend }: { friend: Friend }) {
         <div className="flex flex-col sm:items-end sm:gap-2">
           <div className="flex items-center gap-2 text-sm text-slate-600">
             <span>Stress Level</span>
-            <StressTrend label={friend.status} />
+            <StressTrend label={friend.stressStatus} />
           </div>
           <div className="flex items-center gap-5">
-            <StressProgress label={friend.status} stressLevel={friend.stressLevel ?? 0} />
+            <StressProgress label={friend.stressStatus} stressLevel={friend.stressLevel ?? 0} />
           </div>
         </div>
       </div>
