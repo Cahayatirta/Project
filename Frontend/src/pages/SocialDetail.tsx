@@ -5,7 +5,6 @@ import ActivityCard from "../components/history/ActivityCard";
 import AverageCard from "../components/history/AverageCard";
 import PageHeadline from "../components/PageHeadline";
 import StressBadge from "../components/StressBadge";
-import StressProgress from "../components/StressProgress";
 import type { LoaderData, SocialProfile } from "../utils/types";
 import { initials } from "../utils/util";
 
@@ -56,8 +55,8 @@ export default function SocialDetail() {
                 <span className="text-xs text-slate-500">{friend.time}</span>
               </div>
               <div className="flex items-center gap-3">
-                <StressProgress label={friend.status} stressLevel={friend.stressLevel} />
-                <span className="text-sm font-bold text-slate-900">{friend.stressLevel}%</span>
+                {/* <StressProgress label={friend.status} stressLevel={friend.stressLevel} /> */}
+                {/* <span className="text-sm font-bold text-slate-900">{friend.stressLevel}%</span> */}
               </div>
             </div>
           </div>

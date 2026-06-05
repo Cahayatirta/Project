@@ -42,13 +42,13 @@ export default function MonthCard({
           </div>
         </div>
 
-        <div className="flex items-center justify-between gap-4 sm:justify-end">
+        <div className="flex items-center justify-between gap-1 sm:justify-end">
           <StressBadge label={monthData.stressStatus} />
 
-          <div className="text-right">
+          {/* <div className="text-right">
             <p className="text-xs text-slate-500">Rata-rata Stress</p>
             <p className="text-lg font-bold leading-tight text-slate-800">{monthData.averageStress}</p>
-          </div>
+          </div> */}
 
           <Link
             to={detailPath ?? "/history/2026-04"}
