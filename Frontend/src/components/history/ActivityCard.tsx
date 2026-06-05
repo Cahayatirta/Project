@@ -21,12 +21,12 @@ export default function ActivityCard({ history }: {history: History}) {
           </div>
         </div>
 
-        <div className="flex items-center justify-between gap-2 md:gap-4">
+        <div className="flex flex-col items-end gap-1">
+          <p className="text-right text-sm text-slate-500">Stress Level</p>
           <StressBadge label={history.stressStatus} />
-          <div className="text-right text-xs text-slate-500">
-            <p>Stress Level</p>
+          {/* <div className="text-right text-xs text-slate-500">
             <p className="text-lg font-bold text-slate-800">{history.stressLevel}%</p>
-          </div>
+          </div> */}
         </div>
       </div>
 

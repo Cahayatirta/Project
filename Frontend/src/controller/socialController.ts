@@ -1,6 +1,7 @@
 import type { LoaderFunctionArgs } from "react-router";
 import api from "../utils/api";
 import type { ApiResponse, Friend, SocialProfile, Socials } from "../utils/types";
+import { formatMonth } from "../utils/util";
 
 type SocialOverviewResponse = {
   summary: Socials["summary"];
@@ -25,14 +26,15 @@ export async function friendDetail({ params }: LoaderFunctionArgs) {
   const { data: friendsResponse } = await api.get<ApiResponse<SocialOverviewResponse>>("/social/friends");
   const friend = friendsResponse.data.items.find((item) => item.username === username);
 
-  console.log(friend);
   if (!friend) {
     throw new Response("Not Found", { status: 404 });
   }
 
+  const month = formatMonth(new Date())
   const { data: detailResponse } = await api.get<
     ApiResponse<{ friend: Friend & { biodata?: string }; histories: SocialProfile["histories"] }>
-  >(`/social/friends/${friend.id}`);
+  >(`/social/friends/${friend.id}?month=${month}`);
+
 
   return {
     data: {
