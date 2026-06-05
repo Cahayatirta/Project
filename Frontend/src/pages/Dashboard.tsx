@@ -183,13 +183,17 @@ export default function Dashboard() {
                 <p className="text-2xl font-semibold text-slate-950">{dashboardMetrics.averageStressLevel}%</p>
               </div> */}
               <div className="rounded-md border border-slate-100 bg-slate-50 p-4">
-                <FaFire className="text-primary-600" />
-                <p className="mt-3 text-xs font-medium text-slate-500">Current Streak</p>
+                <div className="flex gap-2 items-center mb-2">
+                  <FaFire className="text-primary-600" />
+                  <p className="text-xs font-medium text-slate-500">Current Streak</p>
+                </div>
                 <p className="text-2xl font-semibold text-slate-950">{dashboardMetrics.currentStreak} days</p>
               </div>
               <div className="rounded-md border border-slate-100 bg-slate-50 p-4">
-                <FaCalendarCheck className="text-primary-600" />
-                <p className="mt-3 text-xs font-medium text-slate-500">Last Activity</p>
+                <div className="flex gap-2 items-center mb-2">
+                  <FaCalendarCheck className="text-primary-600" />
+                  <p className="text-xs font-medium text-slate-500">Last Activity</p>
+                </div>
                 <p className="text-base font-semibold text-slate-950">{dashboardMetrics.latestActivityDate}</p>
               </div>
             </div>

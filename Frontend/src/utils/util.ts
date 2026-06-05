@@ -24,3 +24,10 @@ export function createDateFromRawDate(rawDate: string) {
   const [year, month, date] = rawDate.split("-").map(Number);
   return new Date(year, month - 1, date);
 }
+
+export function formatRawDateToMonthYear(rawDate: string): string {
+  return createDateFromRawDate(rawDate).toLocaleDateString("en-US", {
+    month: "long",
+    year: "numeric",
+  });
+}
