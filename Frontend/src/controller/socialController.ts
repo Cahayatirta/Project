@@ -25,11 +25,12 @@ export async function friendDetail({ params }: LoaderFunctionArgs) {
   const { data: friendsResponse } = await api.get<ApiResponse<SocialOverviewResponse>>("/social/friends");
   const friend = friendsResponse.data.items.find((item) => item.username === username);
 
-  console.log(friend);
+  // console.log(friend);
   if (!friend) {
     throw new Response("Not Found", { status: 404 });
   }
 
+  // console.log(friend);
   const { data: detailResponse } = await api.get<
     ApiResponse<{ friend: Friend & { biodata?: string }; histories: SocialProfile["histories"] }>
   >(`/social/friends/${friend.id}`);

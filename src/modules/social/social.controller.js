@@ -48,7 +48,6 @@ const rejectFriendHandler = asyncHandler(async (req, res) => {
 
 const blockFriendHandler = asyncHandler(async (req, res) => {
   const data = await blockFriend(req.user.sub, req.body.emailAddress);
-
   res.status(200).json({
     message: "Friend blocked successfully",
     data,
@@ -83,8 +82,9 @@ const getFriendAveragesByPermissionHandler = asyncHandler(async (req, res) => {
 });
 
 const getFriendHistoryDetailHandler = asyncHandler(async (req, res) => {
-  const data = await getFriendHistoryDetail(req.user.sub, req.params.friendId, req.query);
 
+  const data = await getFriendHistoryDetail(req.user.sub, req.params.friendId, req.query);
+  console.log("Friend history detail fetched:", data);
   res.status(200).json({
     message: "Friend history detail fetched successfully",
     data,

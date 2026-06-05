@@ -54,7 +54,7 @@ const getMonthlyHistoriesHandler = asyncHandler(async (req, res) => {
 });
 
 const getMonthlyHistoryDetailHandler = asyncHandler(async (req, res) => {
-  const data = await getMonthlyHistoryDetail(req.user.sub, req.query);
+  const data = await getMonthlyHistoryDetail(req.user.sub);
 
   res.status(200).json({
     message: "Monthly history detail fetched successfully",

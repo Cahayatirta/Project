@@ -265,18 +265,14 @@ const getMonthlyHistories = async (userId) => {
   });
 };
 
-const getMonthlyHistoryDetail = async (userId, query = {}) => {
-  let selectedMonth = query.month;
+const getMonthlyHistoryDetail = async (userId) => {
+  const histories = await findHistoriesByRange(userId, null, null);
+  const items = histories.map(mapHistory);
 
-  if (!selectedMonth) {
-    const latestDate = await getLatestHistoryDateByUser(userId);
-    selectedMonth = latestDate ? String(latestDate).slice(0, 7) : toIsoDate(new Date()).slice(0, 7);
-  }
-
-  return getActivities(userId, {
-    period: "monthly",
-    month: selectedMonth,
-  });
+  return {
+    summary: buildSummary(items),
+    history: items.slice().reverse().map(buildHistoryCard),
+  };
 };
 
 const getAverageFactors = async (userId, query) => {

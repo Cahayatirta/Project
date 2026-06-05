@@ -107,14 +107,22 @@ const findHistoryByUserAndDate = async (userId, date) => {
 };
 
 const findHistoriesByRange = async (userId, startDate, endDate) => {
+  const conditions = [`id_user = $1`];
+  const params = [userId];
+
+  if (startDate) {
+    conditions.push(`date >= $${params.length + 1}`);
+    params.push(startDate);
+  }
+
+  if (endDate) {
+    conditions.push(`date <= $${params.length + 1}`);
+    params.push(endDate);
+  }
+
   const result = await db.query(
-    `
-      SELECT ${historyColumns}
-      FROM histories
-      WHERE id_user = $1 AND date BETWEEN $2 AND $3
-      ORDER BY date ASC
-    `,
-    [userId, startDate, endDate]
+    `SELECT ${historyColumns} FROM histories WHERE ${conditions.join(" AND ")} ORDER BY date ASC`,
+    params
   );
 
   return result.rows;
